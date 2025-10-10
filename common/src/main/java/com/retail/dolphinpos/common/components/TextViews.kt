@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 
 @Composable
@@ -18,6 +19,7 @@ fun BaseText(
     fontSize: Float? = null,
     fontWeight: FontWeight = FontWeight.Medium,
     fontFamily: FontFamily = GeneralSans,
+    textAlign: TextAlign = TextAlign.Start,
     style: TextStyle = MaterialTheme.typography.bodyLarge
 ) {
     Text(
@@ -27,6 +29,7 @@ fun BaseText(
         fontSize = fontSize?.sp ?: style.fontSize,
         fontWeight = fontWeight,
         fontFamily = fontFamily,
+        textAlign = textAlign,
         style = style
     )
 }

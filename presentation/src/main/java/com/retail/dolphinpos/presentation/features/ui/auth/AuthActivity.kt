@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.NavHost
@@ -13,6 +14,9 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.retail.dolphinpos.common.PreferenceManager
 import com.retail.dolphinpos.presentation.features.ui.auth.login.LoginScreen
 import com.retail.dolphinpos.presentation.features.ui.auth.splash.SplashScreen
+import com.retail.dolphinpos.presentation.util.ComposeLoaderManager
+import com.retail.dolphinpos.presentation.util.ErrorDialogHandler.GlobalErrorDialogHost
+import com.retail.dolphinpos.presentation.util.Utils.LoaderDialog
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -25,6 +29,7 @@ class AuthActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            GlobalLoaderHandler()
             val navController = rememberNavController()
             val systemUiController = rememberSystemUiController()
 
@@ -44,10 +49,18 @@ class AuthActivity : FragmentActivity() {
                         )
                     }
                     composable("login") {
-                        LoginScreen()
+                        LoginScreen(navController = navController)
                     }
                 }
+                GlobalErrorDialogHost()
             }
+        }
+    }
+
+    @Composable
+    fun GlobalLoaderHandler() {
+        if (ComposeLoaderManager.isVisible) {
+            LoaderDialog(message = ComposeLoaderManager.message)
         }
     }
 }

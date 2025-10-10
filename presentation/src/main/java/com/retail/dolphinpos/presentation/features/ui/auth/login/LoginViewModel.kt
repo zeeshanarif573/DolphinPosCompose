@@ -1,13 +1,13 @@
 package com.retail.dolphinpos.presentation.features.ui.auth.login
 
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.retail.dolphinpos.common.PreferenceManager
+import com.retail.dolphinpos.common.PreferenceHelper
 import com.retail.dolphinpos.domain.model.auth.login.request.LoginRequest
-import com.retail.dolphinpos.domain.model.auth.login.response.LoginData
 import com.retail.dolphinpos.domain.repositories.auth.LoginRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -15,24 +15,30 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(
+open class LoginViewModel @Inject constructor(
     @ApplicationContext val context: Context,
     private val repository: LoginRepository,
-    private val preferenceManager: PreferenceManager
+    private val preferenceHelper: PreferenceHelper
 ) : ViewModel() {
 
-    private val _loginUiEvent = MutableLiveData<LoginUiEvent>()
-    val loginUiEvent: LiveData<LoginUiEvent> = _loginUiEvent
+    // 🔹 Compose state
+    var loginUiEvent by mutableStateOf<LoginUiEvent?>(null)
+        private set
+
+    var isLoading by mutableStateOf(false)
+        private set
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
-            _loginUiEvent.value = LoginUiEvent.ShowLoading
+            isLoading = true
+            loginUiEvent = LoginUiEvent.ShowLoading
             try {
                 val response = repository.login(LoginRequest(username, password))
-                _loginUiEvent.value = LoginUiEvent.HideLoading
+                isLoading = false
+                loginUiEvent = LoginUiEvent.HideLoading
 
                 response.loginData?.let { loginData ->
-                    setPreferences(loginData, password)
+                    preferenceHelper.saveLoginData(loginData, password)
                     loginData.storeInfo.logoUrl?.let {
                         loginData.storeInfo.locations?.let { locationsList ->
                             repository.insertUsersDataIntoLocalDB(
@@ -40,32 +46,25 @@ class LoginViewModel @Inject constructor(
                                 loginData.storeInfo,
                                 it,
                                 locationsList,
-                                preferenceManager.getPassword(),
+                                preferenceHelper.getPassword(),
                                 loginData.user.id,
                                 loginData.user.storeId,
                                 loginData.user.locationId
                             )
                         }
                     }
-                    _loginUiEvent.value = LoginUiEvent.NavigateToRegister
+                    loginUiEvent = LoginUiEvent.NavigateToRegister
 
                 } ?: run {
-                    _loginUiEvent.value =
+                    loginUiEvent =
                         LoginUiEvent.ShowError(response.message ?: "No data received")
                 }
             } catch (e: Exception) {
-                _loginUiEvent.value = LoginUiEvent.HideLoading
-                _loginUiEvent.value = LoginUiEvent.ShowError(e.message ?: "Something went wrong")
+                isLoading = false
+                loginUiEvent = LoginUiEvent.HideLoading
+                loginUiEvent =
+                    LoginUiEvent.ShowError(e.message ?: "Something went wrong")
             }
         }
-    }
-
-    private fun setPreferences(loginData: LoginData, password: String) {
-        preferenceManager.setStoreID(loginData.storeInfo.id)
-        loginData.user.name?.let { preferenceManager.setName(it) }
-        preferenceManager.setPassword(password)
-        preferenceManager.setAccessToken(loginData.accessToken)
-        preferenceManager.setRefreshToken(loginData.refreshToken)
-        preferenceManager.setLogin(true)
     }
 }

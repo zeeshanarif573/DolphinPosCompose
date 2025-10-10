@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.sdp)
     implementation(libs.swipe.refresh)
+    implementation(libs.androidx.navigation.testing)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

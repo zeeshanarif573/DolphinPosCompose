@@ -70,7 +70,7 @@ object RetrofitModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://www.dev-retail.gotmsolutions.com/api/")
+            .baseUrl("https://www.uat-retail.gotmsolutions.com/api/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

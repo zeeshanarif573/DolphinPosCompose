@@ -1,20 +1,31 @@
 package com.retail.dolphinpos.presentation.features.ui.auth.splash
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.retail.dolphinpos.presentation.R
 import com.retail.dolphinpos.common.PreferenceManager
+import com.retail.dolphinpos.common.components.BaseButton
+import com.retail.dolphinpos.common.components.BaseText
 import com.retail.dolphinpos.common.components.HeaderAppBarAuth
+import com.retail.dolphinpos.presentation.R
 
 @Composable
 fun SplashScreen(
@@ -22,14 +33,32 @@ fun SplashScreen(
     preferenceManager: PreferenceManager,
     viewModel: SplashViewModel = hiltViewModel()
 ) {
-    // Collect states from ViewModel flows
     val currentTime by viewModel.currentTime.collectAsState()
     val currentDate by viewModel.currentDate.collectAsState()
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Background image
+    SplashScreenContent(
+        currentTime = currentTime,
+        currentDate = currentDate,
+        onStartClick = {
+            val isLoggedIn = preferenceManager.isLogin()
+            val hasRegister = preferenceManager.getRegister()
+
+            when {
+                !isLoggedIn -> navController.navigate("login")
+                !hasRegister -> navController.navigate("selectRegister")
+                else -> navController.navigate("pinCode")
+            }
+        }
+    )
+}
+
+@Composable
+private fun SplashScreenContent(
+    currentTime: String,
+    currentDate: String,
+    onStartClick: () -> Unit
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.splash_background_image),
             contentDescription = null,
@@ -39,47 +68,50 @@ fun SplashScreen(
 
         HeaderAppBarAuth()
 
-        // Foreground content
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 100.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Time
-            Text(
+            BaseText(
                 text = currentTime,
                 style = MaterialTheme.typography.displayLarge,
-                color = Color.White
+                color = Color.White,
+                fontWeight = FontWeight.Light
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Date
-            Text(
+            BaseText(
                 text = currentDate,
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White,
+                fontWeight = FontWeight.Light
             )
 
             Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Action button
-            Button(
-                onClick = {
-                    val isLoggedIn = preferenceManager.isLogin()
-                    val hasRegister = preferenceManager.getRegister()
-
-                    when {
-                        !isLoggedIn -> navController.navigate("login")
-                        !hasRegister -> navController.navigate("selectRegister")
-                        else -> navController.navigate("pinCode")
-                    }
-                },
-                modifier = Modifier.padding(horizontal = 40.dp)
-            ) {
-                Text(text = "Let’s Start")
-            }
+            BaseButton(
+                text = "Let’s Start",
+                onClick = onStartClick
+            )
         }
+    }
+}
+
+@Preview(
+    showBackground = true,
+    device = "spec:width=1280dp,height=800dp,dpi=480"
+)
+@Composable
+fun SplashScreenPreview() {
+    MaterialTheme {
+        SplashScreenContent(
+            currentTime = "09:43 AM",
+            currentDate = "Friday, 10 Oct 2025",
+            onStartClick = {}
+        )
     }
 }

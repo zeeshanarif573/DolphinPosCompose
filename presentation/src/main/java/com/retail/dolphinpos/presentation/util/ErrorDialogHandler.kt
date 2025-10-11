@@ -35,13 +35,13 @@ object ErrorDialogHandler {
 
     @Composable
     fun GlobalErrorDialogHost() {
-        ErrorDialogHandler.showErrorDialog?.let { data ->
+        showErrorDialog?.let { data ->
             CustomErrorDialog(
                 message = data.message,
                 buttonText = data.buttonText,
                 iconRes = data.iconRes,
                 cancellable = data.cancellable,
-                onDismiss = { ErrorDialogHandler.hideError() },
+                onDismiss = { hideError() },
                 onActionClick = data.onActionClick
             )
         }

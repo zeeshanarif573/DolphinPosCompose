@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,12 +43,12 @@ fun SplashScreen(
         onStartClick = {
             val isLoggedIn = preferenceManager.isLogin()
             val hasRegister = preferenceManager.getRegister()
-
-            when {
-                !isLoggedIn -> navController.navigate("login")
-                !hasRegister -> navController.navigate("selectRegister")
-                else -> navController.navigate("pinCode")
-            }
+            navController.navigate("login")
+//            when {
+//                !isLoggedIn -> navController.navigate("login")
+//                !hasRegister -> navController.navigate("selectRegister")
+//                else -> navController.navigate("pinCode")
+//            }
         }
     )
 }
@@ -95,6 +96,7 @@ private fun SplashScreenContent(
 
             BaseButton(
                 text = "Let’s Start",
+                modifier = Modifier.width(220.dp),
                 onClick = onStartClick
             )
         }

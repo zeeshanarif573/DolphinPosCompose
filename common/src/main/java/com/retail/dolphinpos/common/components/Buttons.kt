@@ -1,6 +1,7 @@
 package com.retail.dolphinpos.common.components
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -17,12 +18,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.retail.dolphinpos.common.R
 
 @Composable
 fun BaseButton(
-    modifier: Modifier = Modifier,
     text: String,
+    modifier: Modifier = Modifier
+        .fillMaxWidth(), // 👈 Default behavior
     enabled: Boolean = true,
     debounceTimeMs: Long = 500L,
     onClick: () -> Unit
@@ -30,7 +33,8 @@ fun BaseButton(
     var lastClickTime by remember { mutableLongStateOf(0L) }
 
     Button(
-        modifier = modifier.height(35.dp),
+        modifier = modifier
+            .height(45.dp), // Slightly taller for better UX
         onClick = {
             val currentTime = System.currentTimeMillis()
             if (currentTime - lastClickTime >= debounceTimeMs) {
@@ -43,7 +47,7 @@ fun BaseButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = colorResource(id = R.color.primary),
             contentColor = Color.White,
-            disabledContainerColor = Color.Gray.copy(alpha = 0.4f),
+            disabledContainerColor = colorResource(id = R.color.primary).copy(alpha = 0.4f),
             disabledContentColor = Color.White.copy(alpha = 0.6f)
         ),
         contentPadding = PaddingValues(horizontal = 60.dp)
@@ -52,9 +56,11 @@ fun BaseButton(
             text = text,
             style = MaterialTheme.typography.labelMedium.copy(
                 fontFamily = GeneralSans,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp,
                 color = Color.White
             )
         )
     }
 }
+

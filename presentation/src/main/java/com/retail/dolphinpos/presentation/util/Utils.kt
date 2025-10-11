@@ -161,6 +161,7 @@ object Utils {
                         .padding(top = 8.dp)
                 )
 
+                Spacer(modifier = Modifier.height(20.dp))
                 // Message
 
                 BaseText(

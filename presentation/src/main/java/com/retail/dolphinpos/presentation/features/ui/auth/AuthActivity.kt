@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.retail.dolphinpos.common.utils.PreferenceManager
 import com.retail.dolphinpos.presentation.features.ui.auth.login.LoginScreen
+import com.retail.dolphinpos.presentation.features.ui.auth.pin_code.PinCodeScreen
 import com.retail.dolphinpos.presentation.features.ui.auth.select_register.SelectRegisterScreen
 import com.retail.dolphinpos.presentation.features.ui.auth.splash.SplashScreen
 import com.retail.dolphinpos.presentation.util.Loader
@@ -55,6 +56,10 @@ class AuthActivity : FragmentActivity() {
 
                     composable("selectRegister") {
                         SelectRegisterScreen(navController = navController)
+                    }
+
+                    composable("pinCode") {
+                        PinCodeScreen(navController = navController)
                     }
                 }
                 GlobalErrorDialogHost()

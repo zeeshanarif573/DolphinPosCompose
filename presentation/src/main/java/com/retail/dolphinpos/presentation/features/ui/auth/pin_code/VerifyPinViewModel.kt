@@ -1,7 +1,5 @@
 package com.retail.dolphinpos.presentation.features.ui.auth.pin_code
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.retail.dolphinpos.common.utils.PreferenceManager
@@ -10,8 +8,10 @@ import com.retail.dolphinpos.domain.model.auth.login.response.AllStoreUsers
 import com.retail.dolphinpos.domain.repositories.auth.VerifyPinRepository
 import com.retail.dolphinpos.domain.usecases.GetCurrentTimeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,8 +27,8 @@ class VerifyPinViewModel @Inject constructor(
     private val _currentDate = MutableStateFlow("")
     val currentDate: StateFlow<String> = _currentDate
 
-    private val _verifyPinUiEvent = MutableLiveData<VerifyPinUiEvent>()
-    val verifyPinUiEvent: LiveData<VerifyPinUiEvent> = _verifyPinUiEvent
+    private val _verifyPinUiEvent = MutableSharedFlow<VerifyPinUiEvent>()
+    val verifyPinUiEvent = _verifyPinUiEvent.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -43,32 +43,39 @@ class VerifyPinViewModel @Inject constructor(
         pin: String
     ) {
         viewModelScope.launch {
-            _verifyPinUiEvent.value = VerifyPinUiEvent.ShowLoading
+            _verifyPinUiEvent.emit(VerifyPinUiEvent.ShowLoading)
             try {
                 val response = repository.getUser(pin)
-                if (response == null) _verifyPinUiEvent.value =
-                    VerifyPinUiEvent.ShowError("No user exist against this PIN")
-                else {
-                    insertActiveUserDetails(response, pin)
-                    _verifyPinUiEvent.value = VerifyPinUiEvent.GetActiveUserDetails(
-                        repository.getActiveUserDetailsByPin(pin)
+                if (response == null) {
+                    _verifyPinUiEvent.emit(VerifyPinUiEvent.HideLoading)
+                    _verifyPinUiEvent.emit(
+                        VerifyPinUiEvent.ShowError("No user exist against this PIN")
                     )
+                } else {
+                    insertActiveUserDetails(response, pin)
+                    _verifyPinUiEvent.emit(
+                        VerifyPinUiEvent.GetActiveUserDetails(
+                            repository.getActiveUserDetailsByPin(pin)
+                        )
+                    )
+                    _verifyPinUiEvent.emit(VerifyPinUiEvent.HideLoading)
+                    
                     if (repository.hasOpenBatch(
                             preferenceManager.getUserID(), preferenceManager.getStoreID(),
                             preferenceManager.getOccupiedRegisterID()
                         )
-                    )
-                        _verifyPinUiEvent.value = VerifyPinUiEvent.NavigateToCartScreen
-                    else
-                        _verifyPinUiEvent.value = VerifyPinUiEvent.NavigateToCashDenomination
+                    ) {
+                        _verifyPinUiEvent.emit(VerifyPinUiEvent.NavigateToCartScreen)
+                    } else {
+                        _verifyPinUiEvent.emit(VerifyPinUiEvent.NavigateToCashDenomination)
+                    }
                 }
 
-                _verifyPinUiEvent.value = VerifyPinUiEvent.HideLoading
-
             } catch (e: Exception) {
-                _verifyPinUiEvent.value = VerifyPinUiEvent.HideLoading
-                _verifyPinUiEvent.value =
+                _verifyPinUiEvent.emit(VerifyPinUiEvent.HideLoading)
+                _verifyPinUiEvent.emit(
                     VerifyPinUiEvent.ShowError(e.message ?: "Something went wrong")
+                )
             }
         }
     }

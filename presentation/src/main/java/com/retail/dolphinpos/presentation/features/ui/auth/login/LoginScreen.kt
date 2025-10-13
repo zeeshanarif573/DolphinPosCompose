@@ -51,12 +51,15 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     val isButtonEnabled = username.isNotBlank() && password.isNotBlank()
 
+    val pleaseWait = stringResource(id = R.string.plz_wait)
+    val tryAgain = stringResource(id = R.string.try_again)
+
     LaunchedEffect(viewModel.loginUiEvent) {
         when (val event = viewModel.loginUiEvent) {
-            is LoginUiEvent.ShowLoading -> Loader.show("Please Wait...")
+            is LoginUiEvent.ShowLoading -> Loader.show(pleaseWait)
             is LoginUiEvent.HideLoading -> Loader.hide()
             is LoginUiEvent.ShowError -> {
-                ErrorDialogHandler.showError(message = event.message, buttonText = "Try Again") {}
+                ErrorDialogHandler.showError(message = event.message, buttonText = tryAgain) {}
             }
 
             is LoginUiEvent.NavigateToRegister -> {

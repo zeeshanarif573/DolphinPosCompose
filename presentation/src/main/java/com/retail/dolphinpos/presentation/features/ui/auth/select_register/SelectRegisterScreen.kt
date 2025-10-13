@@ -57,15 +57,18 @@ fun SelectRegisterScreen(
     var selectedLocation by remember { mutableStateOf<Locations?>(null) }
     var selectedRegister by remember { mutableStateOf<Registers?>(null) }
 
-    val locationError = stringResource(id = R.string.select_location_error)
-    val registerError = stringResource(id = R.string.select_register_error)
+    val locationError = stringResource(id = R.string.no_loc_found)
+    val registerError = stringResource(id = R.string.no_register_found)
+
+    val pleaseWait = stringResource(id = R.string.plz_wait)
+    val tryAgain = stringResource(id = R.string.try_again)
 
     // 🔹 Handle events from ViewModel
     LaunchedEffect(Unit) {
         viewModel.selectRegisterUiEvent.collectLatest { event ->
             when (event) {
                 is SelectRegisterUiEvent.ShowLoading -> {
-                    Loader.show("Please Wait...")
+                    Loader.show(pleaseWait)
                 }
 
                 is SelectRegisterUiEvent.HideLoading -> {
@@ -75,7 +78,7 @@ fun SelectRegisterScreen(
                 is SelectRegisterUiEvent.ShowError -> {
                     ErrorDialogHandler.showError(
                         message = event.message,
-                        buttonText = "Try Again"
+                        buttonText = tryAgain
                     ) {}
                 }
 
@@ -90,7 +93,11 @@ fun SelectRegisterScreen(
                 is SelectRegisterUiEvent.PopulateLocationsList -> {
                     locations = event.locationsList
                     if (event.locationsList.isEmpty()) {
-                        ErrorDialogHandler.showError(message = locationError, buttonText = "OK") {}
+                        ErrorDialogHandler.showError(
+                            message = locationError,
+                            buttonText = "OK",
+                            iconRes = R.drawable.info_icon
+                        ) {}
                     } else {
                         selectedLocation = event.locationsList[0]
                     }
@@ -99,7 +106,11 @@ fun SelectRegisterScreen(
                 is SelectRegisterUiEvent.PopulateRegistersList -> {
                     registers = event.registersList
                     if (event.registersList.isEmpty()) {
-                        ErrorDialogHandler.showError(message = registerError, buttonText = "OK") {}
+                        ErrorDialogHandler.showError(
+                            message = registerError,
+                            buttonText = "OK",
+                            iconRes = R.drawable.info_icon
+                        ) {}
                     } else {
                         if (event.registersList.size == 1) {
                             selectedRegister = event.registersList[0]

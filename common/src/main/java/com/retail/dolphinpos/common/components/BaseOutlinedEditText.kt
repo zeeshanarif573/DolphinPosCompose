@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.retail.dolphinpos.common.R
+import com.retail.dolphinpos.common.utils.GeneralSans
 
 @Composable
 fun BaseOutlinedEditText(

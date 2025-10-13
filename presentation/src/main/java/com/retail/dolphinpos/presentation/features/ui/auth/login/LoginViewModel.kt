@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.retail.dolphinpos.common.PreferenceHelper
+import com.retail.dolphinpos.common.utils.PreferenceManager
 import com.retail.dolphinpos.domain.model.auth.login.request.LoginRequest
 import com.retail.dolphinpos.domain.repositories.auth.LoginRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +18,7 @@ import javax.inject.Inject
 open class LoginViewModel @Inject constructor(
     @ApplicationContext val context: Context,
     private val repository: LoginRepository,
-    private val preferenceHelper: PreferenceHelper
+    private val preferenceManager: PreferenceManager
 ) : ViewModel() {
 
     // 🔹 Compose state
@@ -38,7 +38,7 @@ open class LoginViewModel @Inject constructor(
                 loginUiEvent = LoginUiEvent.HideLoading
 
                 response.loginData?.let { loginData ->
-                    preferenceHelper.saveLoginData(loginData, password)
+                    preferenceManager.saveLoginData(loginData, password)
                     loginData.storeInfo.logoUrl?.let {
                         loginData.storeInfo.locations?.let { locationsList ->
                             repository.insertUsersDataIntoLocalDB(
@@ -46,7 +46,7 @@ open class LoginViewModel @Inject constructor(
                                 loginData.storeInfo,
                                 it,
                                 locationsList,
-                                preferenceHelper.getPassword(),
+                                preferenceManager.getPassword(),
                                 loginData.user.id,
                                 loginData.user.storeId,
                                 loginData.user.locationId

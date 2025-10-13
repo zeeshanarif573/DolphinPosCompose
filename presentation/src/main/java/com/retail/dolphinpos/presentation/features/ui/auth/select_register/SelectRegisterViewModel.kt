@@ -1,18 +1,15 @@
 package com.retail.dolphinpos.presentation.features.ui.auth.select_register
 
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.retail.dolphinpos.common.PreferenceManager
+import com.retail.dolphinpos.common.utils.PreferenceManager
 import com.retail.dolphinpos.domain.model.auth.select_registers.request.UpdateStoreRegisterRequest
-import com.retail.dolphinpos.domain.model.home.catrgories_products.Category
-import com.retail.dolphinpos.domain.model.home.catrgories_products.CategoryData
-import com.retail.dolphinpos.domain.model.home.catrgories_products.Products
 import com.retail.dolphinpos.domain.repositories.auth.StoreRegistersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,9 +20,8 @@ class SelectRegisterViewModel @Inject constructor(
     private val preferenceManager: PreferenceManager
 ) : ViewModel() {
 
-    private val _selectRegisterUiEvent = MutableLiveData<SelectRegisterUiEvent>()
-    val selectRegisterUiEvent: LiveData<SelectRegisterUiEvent> = _selectRegisterUiEvent
-
+    private val _selectRegisterUiEvent = MutableSharedFlow<SelectRegisterUiEvent>()
+    val selectRegisterUiEvent = _selectRegisterUiEvent.asSharedFlow()
 
     init {
         getStoreLocations()
@@ -33,48 +29,54 @@ class SelectRegisterViewModel @Inject constructor(
 
     fun getStoreLocations() {
         viewModelScope.launch {
-            _selectRegisterUiEvent.value = SelectRegisterUiEvent.ShowLoading
+            _selectRegisterUiEvent.emit(SelectRegisterUiEvent.ShowLoading)
             try {
                 val response = storeRegistersRepository.getLocations(preferenceManager.getStoreID())
-                _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
-                if (response.isNotEmpty()) {
-                    _selectRegisterUiEvent.value =
-                        SelectRegisterUiEvent.PopulateLocationsList(response)
-                } else
-                    SelectRegisterUiEvent.ShowError("No Location Found")
+                _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
+                _selectRegisterUiEvent.emit(
+                    SelectRegisterUiEvent.PopulateLocationsList(response)
+                )
+                
+                if (response.isEmpty()) {
+                    _selectRegisterUiEvent.emit(
+                        SelectRegisterUiEvent.PopulateRegistersList(emptyList())
+                    )
+                } else {
+                    getStoreRegisters(response[0].id)
+                }
 
             } catch (e: Exception) {
-                _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
-                _selectRegisterUiEvent.value =
+                _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
+                _selectRegisterUiEvent.emit(
                     SelectRegisterUiEvent.ShowError(e.message ?: "Something went wrong")
+                )
             }
         }
     }
 
     fun getStoreRegisters(locationID: Int) {
         viewModelScope.launch {
-            _selectRegisterUiEvent.value = SelectRegisterUiEvent.ShowLoading
+            _selectRegisterUiEvent.emit(SelectRegisterUiEvent.ShowLoading)
             try {
                 val response =
                     storeRegistersRepository.getRegistersByLocationID(locationID)
-                _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
-                if (response.isNotEmpty()) {
-                    _selectRegisterUiEvent.value =
-                        SelectRegisterUiEvent.PopulateRegistersList(response)
-                } else
-                    SelectRegisterUiEvent.ShowError("No Registers Found")
+                _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
+                _selectRegisterUiEvent.emit(
+                    SelectRegisterUiEvent.PopulateRegistersList(response)
+                )
 
             } catch (e: Exception) {
-                _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
-                _selectRegisterUiEvent.value =
+                _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
+                _selectRegisterUiEvent.emit(
                     SelectRegisterUiEvent.ShowError(e.message ?: "Something went wrong")
+                )
             }
         }
     }
 
     fun updateStoreRegister(locationID: Int, storeRegisterID: Int) {
         viewModelScope.launch {
-            _selectRegisterUiEvent.value = SelectRegisterUiEvent.ShowLoading
+            _selectRegisterUiEvent.emit(SelectRegisterUiEvent.ShowLoading)
             try {
                 val response = storeRegistersRepository.updateStoreRegister(
                     UpdateStoreRegisterRequest(
@@ -88,29 +90,32 @@ class SelectRegisterViewModel @Inject constructor(
                     preferenceManager.setOccupiedLocationID(locationID)
                     preferenceManager.setOccupiedRegisterID(storeRegisterID)
                     storeRegistersRepository.insertRegisterStatusDetailsIntoLocalDB(response.data)
-                    _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
-                    _selectRegisterUiEvent.value = SelectRegisterUiEvent.NavigateToPinScreen
+                    _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
+                    _selectRegisterUiEvent.emit(SelectRegisterUiEvent.NavigateToPinScreen)
                 } ?: run {
-                    _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
+                    _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
                 }
 
             } catch (e: Exception) {
-                _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
-                _selectRegisterUiEvent.value =
+                _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
+                _selectRegisterUiEvent.emit(
                     SelectRegisterUiEvent.ShowError(e.message ?: "Something went wrong")
+                )
             }
         }
     }
 
     fun getProducts(locationID: Int, storeRegisterID: Int) {
         viewModelScope.launch {
+            _selectRegisterUiEvent.emit(SelectRegisterUiEvent.ShowLoading)
             try {
                 val response =
                     storeRegistersRepository.getProducts(preferenceManager.getStoreID(), locationID)
                 if (response.category?.categories.isNullOrEmpty()) {
-                    _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
-                    _selectRegisterUiEvent.value =
+                    _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
+                    _selectRegisterUiEvent.emit(
                         SelectRegisterUiEvent.ShowError("No categories found in response")
+                    )
                     return@launch
                 }
 
@@ -146,32 +151,34 @@ class SelectRegisterViewModel @Inject constructor(
                         }
                     }
                 }
-                _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
+                _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
                 updateStoreRegister(locationID, storeRegisterID)
 
             } catch (e: Exception) {
-                _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
-                _selectRegisterUiEvent.value =
+                _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
+                _selectRegisterUiEvent.emit(
                     SelectRegisterUiEvent.ShowError(e.message ?: "Something went wrong")
+                )
             }
         }
     }
 
     fun logout() {
         viewModelScope.launch {
-            _selectRegisterUiEvent.value = SelectRegisterUiEvent.ShowLoading
+            _selectRegisterUiEvent.emit(SelectRegisterUiEvent.ShowLoading)
             try {
                 val response = storeRegistersRepository.logout()
                 response.message.let {
                     preferenceManager.setLogin(false)
-                    _selectRegisterUiEvent.value = SelectRegisterUiEvent.NavigateToLoginScreen
+                    _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
+                    _selectRegisterUiEvent.emit(SelectRegisterUiEvent.NavigateToLoginScreen)
                 }
-                _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
 
             } catch (e: Exception) {
-                _selectRegisterUiEvent.value = SelectRegisterUiEvent.HideLoading
-                _selectRegisterUiEvent.value =
+                _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
+                _selectRegisterUiEvent.emit(
                     SelectRegisterUiEvent.ShowError(e.message ?: "Something went wrong")
+                )
             }
         }
     }

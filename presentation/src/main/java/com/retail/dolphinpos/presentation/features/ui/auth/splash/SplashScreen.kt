@@ -17,12 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.retail.dolphinpos.common.PreferenceManager
+import com.retail.dolphinpos.common.utils.PreferenceManager
 import com.retail.dolphinpos.common.components.BaseButton
 import com.retail.dolphinpos.common.components.BaseText
 import com.retail.dolphinpos.common.components.HeaderAppBarAuth
@@ -44,11 +45,11 @@ fun SplashScreen(
             val isLoggedIn = preferenceManager.isLogin()
             val hasRegister = preferenceManager.getRegister()
             navController.navigate("login")
-//            when {
-//                !isLoggedIn -> navController.navigate("login")
-//                !hasRegister -> navController.navigate("selectRegister")
-//                else -> navController.navigate("pinCode")
-//            }
+            when {
+                !isLoggedIn -> navController.navigate("login")
+                !hasRegister -> navController.navigate("selectRegister")
+                else -> navController.navigate("pinCode")
+            }
         }
     )
 }
@@ -95,7 +96,7 @@ private fun SplashScreenContent(
             Spacer(modifier = Modifier.height(20.dp))
 
             BaseButton(
-                text = "Let’s Start",
+                text = stringResource(id = R.string.let_s_start),
                 modifier = Modifier.width(220.dp),
                 onClick = onStartClick
             )

@@ -1,4 +1,4 @@
-package com.retail.dolphinpos.common.components
+package com.retail.dolphinpos.common.utils
 
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily

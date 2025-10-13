@@ -55,6 +55,7 @@ coilCompose = "3.0.3"
 runtime = "1.9.3"
 accompanist = "0.36.0"
 navigationTesting = "2.9.5"
+runtimeLivedata = "1.9.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -128,6 +129,7 @@ coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref 
 androidx-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

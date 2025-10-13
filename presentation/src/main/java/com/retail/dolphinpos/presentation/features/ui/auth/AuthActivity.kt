@@ -11,10 +11,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.retail.dolphinpos.common.PreferenceManager
+import com.retail.dolphinpos.common.utils.PreferenceManager
 import com.retail.dolphinpos.presentation.features.ui.auth.login.LoginScreen
+import com.retail.dolphinpos.presentation.features.ui.auth.select_register.SelectRegisterScreen
 import com.retail.dolphinpos.presentation.features.ui.auth.splash.SplashScreen
-import com.retail.dolphinpos.presentation.util.ComposeLoaderManager
+import com.retail.dolphinpos.presentation.util.Loader
 import com.retail.dolphinpos.presentation.util.ErrorDialogHandler.GlobalErrorDialogHost
 import com.retail.dolphinpos.presentation.util.Utils.LoaderDialog
 import dagger.hilt.android.AndroidEntryPoint
@@ -51,6 +52,10 @@ class AuthActivity : FragmentActivity() {
                     composable("login") {
                         LoginScreen(navController = navController)
                     }
+
+                    composable("selectRegister") {
+                        SelectRegisterScreen(navController = navController)
+                    }
                 }
                 GlobalErrorDialogHost()
             }
@@ -59,8 +64,8 @@ class AuthActivity : FragmentActivity() {
 
     @Composable
     fun GlobalLoaderHandler() {
-        if (ComposeLoaderManager.isVisible) {
-            LoaderDialog(message = ComposeLoaderManager.message)
+        if (Loader.isVisible) {
+            LoaderDialog(message = Loader.message)
         }
     }
 }

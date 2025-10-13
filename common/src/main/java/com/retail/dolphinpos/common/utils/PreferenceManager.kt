@@ -1,8 +1,9 @@
-package com.retail.dolphinpos.common
+package com.retail.dolphinpos.common.utils
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.retail.dolphinpos.domain.model.auth.login.response.LoginData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -90,6 +91,15 @@ class PreferenceManager @Inject constructor(
 
     fun getOccupiedRegisterID(defaultValue: Int = 0): Int {
         return prefs.getInt(Constants.OCCUPIED_REGISTER_ID, defaultValue)
+    }
+
+    fun saveLoginData(loginData: LoginData, password: String) {
+        setStoreID(loginData.storeInfo.id)
+        loginData.user.name?.let { setName(it) }
+        setPassword(password)
+        setAccessToken(loginData.accessToken)
+        setRefreshToken(loginData.refreshToken)
+        setLogin(true)
     }
 
 }

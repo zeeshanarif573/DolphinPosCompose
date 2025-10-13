@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.retail.dolphinpos.common.PreferenceManager
+import com.retail.dolphinpos.common.utils.PreferenceManager
 import com.retail.dolphinpos.domain.model.auth.active_user.ActiveUserDetails
 import com.retail.dolphinpos.domain.model.auth.login.response.AllStoreUsers
 import com.retail.dolphinpos.domain.repositories.auth.VerifyPinRepository

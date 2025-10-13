@@ -12,10 +12,12 @@
     <string name="login">Login</string>
     <string name="split">Split</string>
     <string name="search">Search</string>
+    <string name="select_location_error">Please select a location</string>
+    <string name="select_register_error">Please select a register</string>
     <string name="search_items">Search Items</string>
     <string name="pending_orders">Pending Orders</string>
     <string name="gift_card">Gift Card</string>
-    <string name="you_re_almost_ready_to_start_your_shift_please_select_your_register_to_continue">You\'re almost ready to start your shift. Please select your register to continue.</string>
+    <string name="you_re_almost_ready_to_start_your_shift_please_select_your_register_to_continue">You\'re almost ready to start your shift.\nPlease select your register to continue.</string>
     <string name="button_continue">Continue</string>
     <string name="select_store">Select Store</string>
     <string name="select_register">Select Register</string>

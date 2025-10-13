@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,7 +39,7 @@ import com.retail.dolphinpos.common.components.BaseOutlinedEditText
 import com.retail.dolphinpos.common.components.BaseText
 import com.retail.dolphinpos.common.components.HeaderAppBarAuth
 import com.retail.dolphinpos.presentation.R
-import com.retail.dolphinpos.presentation.util.ComposeLoaderManager
+import com.retail.dolphinpos.presentation.util.Loader
 import com.retail.dolphinpos.presentation.util.ErrorDialogHandler
 
 @Composable
@@ -52,8 +53,8 @@ fun LoginScreen(
 
     LaunchedEffect(viewModel.loginUiEvent) {
         when (val event = viewModel.loginUiEvent) {
-            is LoginUiEvent.ShowLoading -> ComposeLoaderManager.show("Please Wait...")
-            is LoginUiEvent.HideLoading -> ComposeLoaderManager.hide()
+            is LoginUiEvent.ShowLoading -> Loader.show("Please Wait...")
+            is LoginUiEvent.HideLoading -> Loader.hide()
             is LoginUiEvent.ShowError -> {
                 ErrorDialogHandler.showError(message = event.message, buttonText = "Try Again") {}
             }
@@ -93,7 +94,7 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 BaseText(
-                    text = "Let’s Get Started",
+                    text = stringResource(id = R.string.let_s_get_started),
                     style = MaterialTheme.typography.headlineSmall,
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
@@ -104,7 +105,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 BaseText(
-                    text = "Log in to your Retail POS system and\nmanage transactions effortlessly",
+                    text = stringResource(id = R.string.log_in_to_your_retail_pos_system_and_manage_transactions_effortlessly),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White,
                     fontWeight = FontWeight.Medium,
@@ -116,7 +117,7 @@ fun LoginScreen(
             // Right Side - Card
             Card(
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(0.8f)
                     .fillMaxHeight()
                     .padding(horizontal = 40.dp, vertical = 60.dp),
                 shape = RoundedCornerShape(5.dp),
@@ -141,8 +142,8 @@ fun LoginScreen(
                             painter = painterResource(id = R.drawable.logo),
                             contentDescription = "Logo",
                             modifier = Modifier
-                                .size(140.dp)
-                                .padding(top = 40.dp, bottom = 20.dp)
+                                .size(120.dp)
+                                .padding(top = 30.dp, bottom = 20.dp)
                         )
                     }
 
@@ -164,14 +165,14 @@ fun LoginScreen(
                         BaseOutlinedEditText(
                             value = username,
                             onValueChange = { username = it },
-                            placeholder = "Enter Username"
+                            placeholder = stringResource(id = R.string.enter_username)
                         )
 
                         Spacer(modifier = Modifier.height(10.dp))
 
                         // Password
                         BaseText(
-                            text = "Password",
+                            text = stringResource(id = R.string.password),
                             style = MaterialTheme.typography.labelLarge,
                             color = colorResource(id = R.color.bgColorLabels),
                             textAlign = TextAlign.Start,
@@ -181,14 +182,14 @@ fun LoginScreen(
                         BaseOutlinedEditText(
                             value = password,
                             onValueChange = { password = it },
-                            placeholder = "Enter Password"
+                            placeholder = stringResource(id = R.string.enter_password)
                         )
 
                         Spacer(modifier = Modifier.height(40.dp))
 
                         // Login Button
                         BaseButton(
-                            text = "Login",
+                            text = stringResource(id = R.string.login),
                             enabled = isButtonEnabled,
                             onClick = {
                                 if (isButtonEnabled) {

@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.retail.dolphinpos.common.R
+import com.retail.dolphinpos.common.utils.GeneralSans
 
 @Composable
 fun BaseButton(

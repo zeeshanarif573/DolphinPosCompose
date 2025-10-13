@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.sdp)
     implementation(libs.swipe.refresh)
     implementation(libs.androidx.navigation.testing)
+    implementation(libs.androidx.runtime.livedata)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

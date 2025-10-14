@@ -28,10 +28,13 @@ fun BaseButton(
     modifier: Modifier = Modifier
         .fillMaxWidth(), // 👈 Default behavior
     enabled: Boolean = true,
+    backgroundColor: Color? = null, // 👈 Dynamic color parameter
     debounceTimeMs: Long = 500L,
     onClick: () -> Unit
 ) {
     var lastClickTime by remember { mutableLongStateOf(0L) }
+    
+    val containerColor = backgroundColor ?: colorResource(id = R.color.primary)
 
     Button(
         modifier = modifier
@@ -46,9 +49,9 @@ fun BaseButton(
         enabled = enabled,
         shape = RoundedCornerShape(5.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = colorResource(id = R.color.primary),
+            containerColor = containerColor,
             contentColor = Color.White,
-            disabledContainerColor = colorResource(id = R.color.primary).copy(alpha = 0.4f),
+            disabledContainerColor = containerColor.copy(alpha = 0.4f),
             disabledContentColor = Color.White.copy(alpha = 0.6f)
         ),
         contentPadding = PaddingValues(horizontal = 60.dp)

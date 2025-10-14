@@ -12,6 +12,7 @@
     <string name="login">Login</string>
     <string name="split">Split</string>
     <string name="search">Search</string>
+    <string name="coins">Coins</string>
     <string name="no_loc_found">No Location Found</string>
     <string name="no_register_found">No Register Found</string>
     <string name="select_register_error">Please select a register</string>

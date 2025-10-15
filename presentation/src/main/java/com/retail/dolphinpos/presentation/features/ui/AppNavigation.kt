@@ -12,6 +12,7 @@ import com.retail.dolphinpos.presentation.features.ui.auth.login.LoginScreen
 import com.retail.dolphinpos.presentation.features.ui.auth.pin_code.PinCodeScreen
 import com.retail.dolphinpos.presentation.features.ui.auth.select_register.SelectRegisterScreen
 import com.retail.dolphinpos.presentation.features.ui.auth.splash.SplashScreen
+import com.retail.dolphinpos.presentation.features.ui.home.HomeScreen
 
 @Composable
 fun AppNavigation(preferenceManager: PreferenceManager) {
@@ -55,7 +56,7 @@ fun AppNavigation(preferenceManager: PreferenceManager) {
 
         // Home/Cart Screen (when you create it)
         composable("home") {
-            // HomeScreen(navController = navController)
+            HomeScreen(navController = navController)
         }
     }
 }

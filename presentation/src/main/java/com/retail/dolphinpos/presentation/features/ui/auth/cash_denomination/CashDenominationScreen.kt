@@ -197,6 +197,9 @@ fun CashDenominationScreen(
                 ) {
                     val batchNo = generateBatchNo()
                     viewModel.startBatch(batchNo)
+                    navController.navigate(
+                        "home"
+                    )
                     // Navigate to HomeActivity
                     // Note: You'll need to handle navigation to HomeActivity
                 }

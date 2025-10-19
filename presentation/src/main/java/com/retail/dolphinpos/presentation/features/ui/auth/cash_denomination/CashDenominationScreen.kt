@@ -212,7 +212,8 @@ fun CashDenominationScreen(
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
                         .height(48.dp),
-                    backgroundColor = Color.Gray
+                    backgroundColor = Color.Gray,
+                    fontSize = 14
                 ) {
                     // Handle open cash drawer
                 }

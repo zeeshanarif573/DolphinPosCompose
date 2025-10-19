@@ -3,6 +3,7 @@ package com.retail.dolphinpos.presentation.features.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.retail.dolphinpos.common.utils.PreferenceManager
+import com.retail.dolphinpos.domain.model.home.bottom_nav.BottomMenu
 import com.retail.dolphinpos.domain.model.home.cart.CartItem
 import com.retail.dolphinpos.domain.model.home.cart.DiscountType
 import com.retail.dolphinpos.domain.model.home.cart.getProductDiscountedPrice
@@ -10,6 +11,7 @@ import com.retail.dolphinpos.domain.model.home.catrgories_products.Products
 import com.retail.dolphinpos.domain.model.home.customer.Customer
 import com.retail.dolphinpos.domain.model.home.order_discount.OrderDiscount
 import com.retail.dolphinpos.domain.repositories.home.HomeRepository
+import com.retail.dolphinpos.presentation.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -66,8 +68,12 @@ class HomeViewModel @Inject constructor(
     private val _categories = MutableStateFlow<List<com.retail.dolphinpos.domain.model.home.catrgories_products.CategoryData>>(emptyList())
     val categories: StateFlow<List<com.retail.dolphinpos.domain.model.home.catrgories_products.CategoryData>> = _categories.asStateFlow()
 
+    private val _menus = MutableStateFlow<List<BottomMenu>>(emptyList())
+    val menus: StateFlow<List<BottomMenu>> = _menus.asStateFlow()
+
     init {
         loadCategories()
+        loadMenus()
     }
 
     private fun loadCategories() {
@@ -87,6 +93,35 @@ class HomeViewModel @Inject constructor(
                 _homeUiEvent.emit(HomeUiEvent.ShowError(e.message ?: "Something went wrong"))
             }
         }
+    }
+
+    private fun loadMenus() {
+        _menus.value = listOf(
+            BottomMenu(
+                menuName = "Home",
+                destinationId = R.id.homeScreen
+            ),
+            BottomMenu(
+                menuName = "Products",
+                destinationId = R.id.productsScreen
+            ),
+            BottomMenu(
+                menuName = "Orders",
+                destinationId = R.id.ordersScreen
+            ),
+            BottomMenu(
+                menuName = "Inventory",
+                destinationId = R.id.inventoryScreen
+            ),
+            BottomMenu(
+                menuName = "Reports",
+                destinationId = R.id.reportsScreen
+            ),
+            BottomMenu(
+                menuName = "Setup",
+                destinationId = R.id.setupScreen
+            )
+        )
     }
 
     fun loadProducts(categoryId: Int) {

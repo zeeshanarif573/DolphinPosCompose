@@ -12,7 +12,6 @@ import com.retail.dolphinpos.presentation.features.ui.auth.login.LoginScreen
 import com.retail.dolphinpos.presentation.features.ui.auth.pin_code.PinCodeScreen
 import com.retail.dolphinpos.presentation.features.ui.auth.select_register.SelectRegisterScreen
 import com.retail.dolphinpos.presentation.features.ui.auth.splash.SplashScreen
-import com.retail.dolphinpos.presentation.features.ui.home.HomeScreen
 
 @Composable
 fun AppNavigation(preferenceManager: PreferenceManager) {
@@ -54,9 +53,34 @@ fun AppNavigation(preferenceManager: PreferenceManager) {
             CashDenominationScreen(navController = navController)
         }
 
-        // Home/Cart Screen (when you create it)
+        // Main Layout with Bottom Navigation (Home, Products, Orders, Reports, Setup)
         composable("home") {
-            HomeScreen(navController = navController)
+            MainLayout(navController = navController)
+        }
+
+        // Products Screen (accessed through MainLayout)
+        composable("products") {
+            MainLayout(navController = navController)
+        }
+
+        // Orders Screen (accessed through MainLayout)
+        composable("orders") {
+            MainLayout(navController = navController)
+        }
+
+        // Inventory Screen (accessed through MainLayout)
+        composable("inventory") {
+            MainLayout(navController = navController)
+        }
+
+        // Reports Screen (accessed through MainLayout)
+        composable("reports") {
+            MainLayout(navController = navController)
+        }
+
+        // Hardware Setup Screen (accessed through MainLayout)
+        composable("setup") {
+            MainLayout(navController = navController)
         }
     }
 }

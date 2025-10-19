@@ -4,12 +4,5 @@ import androidx.annotation.IdRes
 
 data class BottomMenu(
     val menuName: String,
-    @IdRes val destinationId: Int? = null,
-    val activityClass: Class<*>? = null,
-    val action: MenuAction
+    @IdRes val destinationId: Int
 )
-
-enum class MenuAction {
-    NAV_DESTINATION,
-    OPEN_ACTIVITY
-}

@@ -29,6 +29,7 @@ fun BaseButton(
         .fillMaxWidth(), // 👈 Default behavior
     enabled: Boolean = true,
     backgroundColor: Color? = null, // 👈 Dynamic color parameter
+    fontSize: Int = 16, // 👈 Font size parameter in sp
     debounceTimeMs: Long = 500L,
     onClick: () -> Unit
 ) {
@@ -61,7 +62,7 @@ fun BaseButton(
             style = MaterialTheme.typography.labelMedium.copy(
                 fontFamily = GeneralSans,
                 fontWeight = FontWeight.Medium,
-                fontSize = 16.sp,
+                fontSize = fontSize.sp,
                 color = Color.White
             )
         )

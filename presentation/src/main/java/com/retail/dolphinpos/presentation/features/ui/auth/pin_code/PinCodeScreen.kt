@@ -99,8 +99,9 @@ fun PinCodeScreen(
                 }
 
                 is VerifyPinUiEvent.NavigateToCartScreen -> {
-//                    context.startActivity(Intent(context, HomeActivity::class.java))
-//                    (context as? android.app.Activity)?.finish()
+                    navController.navigate(
+                        "home"
+                    )
                 }
             }
         }

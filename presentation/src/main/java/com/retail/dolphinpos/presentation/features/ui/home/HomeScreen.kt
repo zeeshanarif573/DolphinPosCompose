@@ -1,9 +1,22 @@
 package com.retail.dolphinpos.presentation.features.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -12,8 +25,24 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +61,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.retail.dolphinpos.common.components.BaseText
+import com.retail.dolphinpos.common.components.HeaderAppBarAuth
 import com.retail.dolphinpos.common.utils.GeneralSans
 import com.retail.dolphinpos.domain.model.home.cart.CartItem
 import com.retail.dolphinpos.domain.model.home.catrgories_products.CategoryData
@@ -39,7 +69,7 @@ import com.retail.dolphinpos.domain.model.home.catrgories_products.Products
 import com.retail.dolphinpos.presentation.R
 import com.retail.dolphinpos.presentation.util.ErrorDialogHandler
 import com.retail.dolphinpos.presentation.util.Loader
-import java.util.*
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,12 +103,14 @@ fun HomeScreen(
                         buttonText = "OK"
                     ) {}
                 }
+
                 is HomeUiEvent.PopulateCategoryList -> {
                     if (event.categoryList.isNotEmpty()) {
                         selectedCategory = event.categoryList[0]
                         viewModel.loadProducts(event.categoryList[0].id)
                     }
                 }
+
                 is HomeUiEvent.PopulateProductsList -> {
                     // Products are already updated in ViewModel
                 }
@@ -99,99 +131,108 @@ fun HomeScreen(
         paymentAmount = viewModel.formatAmount(totalAmount)
     }
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(id = R.color.light_grey))
     ) {
-        // Left Panel - Cart (30% width)
-        CartPanel(
-            modifier = Modifier.weight(0.3f),
-            cartItems = cartItems,
-            subtotal = subtotal,
-            tax = tax,
-            totalAmount = totalAmount,
-            cashDiscountTotal = cashDiscountTotal,
-            orderDiscountTotal = orderDiscountTotal,
-            paymentAmount = paymentAmount,
-            onPaymentAmountChange = { paymentAmount = it },
-            onRemoveFromCart = { viewModel.removeFromCart(it) },
-            onUpdateCartItem = { viewModel.updateCartItem(it) },
-            onClearCart = { viewModel.clearCart() },
-            onDigitClick = { digit ->
-                val current = paymentAmount.replace("$", "").toDoubleOrNull() ?: 0.0
-                val newAmount = viewModel.appendDigitToAmount(current, digit)
-                paymentAmount = viewModel.formatAmount(newAmount)
-            },
-            onAmountSet = { amount ->
-                paymentAmount = viewModel.formatAmount(amount)
-            },
-            onCashSelected = {
-                viewModel.isCashSelected = true
-                viewModel.updateCartPrices()
-            },
-            onCardSelected = {
-                viewModel.isCashSelected = false
-                viewModel.updateCartPrices()
-            },
-            onExactAmount = {
-                paymentAmount = viewModel.formatAmount(totalAmount)
-            },
-            onRemoveDigit = {
-                val current = paymentAmount.replace("$", "").toDoubleOrNull() ?: 0.0
-                val newAmount = viewModel.removeLastDigit(current)
-                paymentAmount = viewModel.formatAmount(newAmount)
-            },
-            onAddCustomer = {
-                // TODO: Show add customer dialog
-            }
-        )
+        // Header App Bar
+        HeaderAppBarAuth()
 
-        // Right Panel - Products (70% width)
-        Column(
-            modifier = Modifier.weight(0.7f)
+        Row(
+            modifier = Modifier.weight(1f)
         ) {
-            // Action Bar
-            ActionBar(
-                userName = viewModel.getName(),
-                searchQuery = searchQuery,
-                onSearchQueryChange = { query ->
-                    searchQuery = query
-                    viewModel.searchProducts(query)
-                },
-                onLogout = {
-                    // TODO: Show logout dialog
+            // Column 1 - Cart (25% width, full height)
+            CartPanel(
+                modifier = Modifier.weight(0.3f),
+                cartItems = cartItems,
+                onRemoveFromCart = { viewModel.removeFromCart(it) },
+                onUpdateCartItem = { viewModel.updateCartItem(it) },
+                onAddCustomer = {
+                    // TODO: Show add customer dialog
                 }
             )
 
-            Row(
-                modifier = Modifier.fillMaxSize()
+            // Column 2 - Pricing/Payment/Keypad + Action Buttons (25% width, full height)
+            Column(
+                modifier = Modifier
+                    .weight(0.25f)
+                    .background(colorResource(id = R.color.light_grey))
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Categories (Left side - 30%)
-                CategoriesPanel(
-                    modifier = Modifier.weight(0.3f),
-                    categories = categories,
-                    selectedCategory = selectedCategory,
-                    onCategorySelected = { category ->
-                        selectedCategory = category
-                        viewModel.loadProducts(category.id)
+                // Pricing Summary
+                PricingSummary(
+                    subtotal = subtotal,
+                    cashDiscountTotal = cashDiscountTotal,
+                    orderDiscountTotal = orderDiscountTotal,
+                    tax = tax,
+                    totalAmount = totalAmount
+                )
+
+                // Cart Action Buttons
+                CartActionButtons(
+                    onClearCart = { viewModel.clearCart() }
+                )
+
+                // Payment Input
+                PaymentInput(
+                    paymentAmount = paymentAmount,
+                    onPaymentAmountChange = { paymentAmount = it },
+                    onRemoveDigit = {
+                        val current = paymentAmount.replace("$", "").toDoubleOrNull() ?: 0.0
+                        val newAmount = viewModel.removeLastDigit(current)
+                        paymentAmount = viewModel.formatAmount(newAmount)
                     }
                 )
 
-                // Products (Middle - 60%)
-                ProductsPanel(
-                    modifier = Modifier.weight(0.6f),
-                    products = if (searchQuery.isNotEmpty()) searchResults else products,
-                    onProductClick = { product ->
-                        viewModel.addToCart(product)
+                // Keypad
+                Keypad(
+                    onDigitClick = { digit ->
+                        val current = paymentAmount.replace("$", "").toDoubleOrNull() ?: 0.0
+                        val newAmount = viewModel.appendDigitToAmount(current, digit)
+                        paymentAmount = viewModel.formatAmount(newAmount)
+                    },
+                    onAmountSet = { amount ->
+                        paymentAmount = viewModel.formatAmount(amount)
+                    },
+                    onExactAmount = {
+                        paymentAmount = viewModel.formatAmount(totalAmount)
                     }
                 )
 
-                // Action Buttons (Right side - 40%)
-                ActionButtonsPanel(
-                    modifier = Modifier.weight(0.4f)
+                // Payment Methods
+                PaymentMethods(
+                    onCashSelected = {
+                        viewModel.isCashSelected = true
+                        viewModel.updateCartPrices()
+                    },
+                    onCardSelected = {
+                        viewModel.isCashSelected = false
+                        viewModel.updateCartPrices()
+                    }
                 )
             }
+
+            // Column 3 - Categories (25% width, full height)
+            CategoriesPanel(
+                modifier = Modifier.weight(0.15f),
+                categories = categories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = { category ->
+                    selectedCategory = category
+                    viewModel.loadProducts(category.id)
+                }
+            )
+
+            // Column 4 - Products (25% width)
+            ProductsPanel(
+                modifier = Modifier.weight(0.3f),
+                products = if (searchQuery.isNotEmpty()) searchResults else products,
+                onProductClick = { product ->
+                    viewModel.addToCart(product)
+                }
+            )
         }
     }
 }
@@ -200,92 +241,38 @@ fun HomeScreen(
 fun CartPanel(
     modifier: Modifier = Modifier,
     cartItems: List<CartItem>,
-    subtotal: Double,
-    tax: Double,
-    totalAmount: Double,
-    cashDiscountTotal: Double,
-    orderDiscountTotal: Double,
-    paymentAmount: String,
-    onPaymentAmountChange: (String) -> Unit,
     onRemoveFromCart: (Int) -> Unit,
     onUpdateCartItem: (CartItem) -> Unit,
-    onClearCart: () -> Unit,
-    onDigitClick: (String) -> Unit,
-    onAmountSet: (Double) -> Unit,
-    onCashSelected: () -> Unit,
-    onCardSelected: () -> Unit,
-    onExactAmount: () -> Unit,
-    onRemoveDigit: () -> Unit,
     onAddCustomer: () -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .background(colorResource(id = R.color.light_grey))
-            .padding(8.dp)
+            .padding(8.dp),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // Order Header
-        CartHeader(
-            cartItemsCount = cartItems.size,
-            onAddCustomer = onAddCustomer
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Cart Items or Empty State
-        if (cartItems.isEmpty()) {
-            EmptyCartState()
-        } else {
-            CartItemsList(
-                cartItems = cartItems,
-                onRemoveFromCart = onRemoveFromCart,
-                onUpdateCartItem = onUpdateCartItem
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            // Order Header
+            CartHeader(
+                cartItemsCount = cartItems.size,
+                onAddCustomer = onAddCustomer
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Cart Items or Empty State
+            if (cartItems.isEmpty()) {
+                EmptyCartState()
+            } else {
+                CartItemsList(
+                    cartItems = cartItems,
+                    onRemoveFromCart = onRemoveFromCart,
+                    onUpdateCartItem = onUpdateCartItem
+                )
+            }
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Pricing Summary
-        PricingSummary(
-            subtotal = subtotal,
-            cashDiscountTotal = cashDiscountTotal,
-            orderDiscountTotal = orderDiscountTotal,
-            tax = tax,
-            totalAmount = totalAmount
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Action Buttons Row
-        CartActionButtons(
-            onClearCart = onClearCart
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Payment Input
-        PaymentInput(
-            paymentAmount = paymentAmount,
-            onPaymentAmountChange = onPaymentAmountChange,
-            onRemoveDigit = onRemoveDigit
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Keypad
-        Keypad(
-            onDigitClick = onDigitClick,
-            onAmountSet = onAmountSet,
-            onExactAmount = onExactAmount
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Payment Methods
-        PaymentMethods(
-            onCashSelected = onCashSelected,
-            onCardSelected = onCardSelected
-        )
     }
 }
 
@@ -338,6 +325,7 @@ fun EmptyCartState() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .fillMaxHeight()
             .background(
                 color = Color.White,
                 shape = RoundedCornerShape(4.dp)
@@ -352,9 +340,9 @@ fun EmptyCartState() {
             modifier = Modifier.size(48.dp),
             tint = colorResource(id = R.color.light_grey)
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         BaseText(
             text = stringResource(id = R.string.empty),
             color = Color.Black,
@@ -374,6 +362,7 @@ fun CartItemsList(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
+            .fillMaxHeight()
             .background(
                 color = Color.White,
                 shape = RoundedCornerShape(4.dp)
@@ -399,10 +388,12 @@ fun CartItemRow(
 ) {
     val finalPrice = run {
         val discount = when (item.discountType) {
-            com.retail.dolphinpos.domain.model.home.cart.DiscountType.PERCENTAGE -> 
+            com.retail.dolphinpos.domain.model.home.cart.DiscountType.PERCENTAGE ->
                 (item.selectedPrice * (item.discountValue ?: 0.0) / 100.0)
-            com.retail.dolphinpos.domain.model.home.cart.DiscountType.AMOUNT -> 
+
+            com.retail.dolphinpos.domain.model.home.cart.DiscountType.AMOUNT ->
                 item.discountValue ?: 0.0
+
             else -> 0.0
         }
         (item.selectedPrice - discount).coerceAtLeast(0.0)
@@ -424,7 +415,7 @@ fun CartItemRow(
                 fontSize = 12f,
                 fontFamily = GeneralSans
             )
-            
+
             BaseText(
                 text = "Qty: ${item.quantity}",
                 color = Color.Gray,
@@ -495,12 +486,12 @@ fun PricingSummary(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-            BaseText(
-                text = "Cash Discount",
-                color = Color.Black,
-                fontSize = 12f,
-                fontFamily = GeneralSans
-            )
+                BaseText(
+                    text = "Cash Discount",
+                    color = Color.Black,
+                    fontSize = 12f,
+                    fontFamily = GeneralSans
+                )
                 BaseText(
                     text = "-$${String.format("%.2f", cashDiscountTotal)}",
                     color = Color.Black,
@@ -613,54 +604,94 @@ fun CartActionButtons(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         // Clear Cart
-        IconButton(
+        Card(
             onClick = onClearCart,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
+            shape = RoundedCornerShape(4.dp),
+            colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.light_grey))
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.clear_cart_btn),
-                contentDescription = "Clear Cart",
-                modifier = Modifier.size(24.dp)
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.clear_cart_btn),
+                    contentDescription = "Clear Cart",
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Fit
+                )
+            }
         }
 
         // Hold Cart
-        IconButton(
+        Card(
             onClick = { /* TODO */ },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
+            shape = RoundedCornerShape(4.dp),
+            colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.light_grey))
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.hold_cart_btn),
-                contentDescription = "Hold Cart",
-                modifier = Modifier.size(24.dp)
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.hold_cart_btn),
+                    contentDescription = "Hold Cart",
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Fit
+                )
+            }
         }
 
         // Price Check
-        IconButton(
+        Card(
             onClick = { /* TODO */ },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
+            shape = RoundedCornerShape(4.dp),
+            colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.light_grey))
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.price_check_btn),
-                contentDescription = "Price Check",
-                modifier = Modifier.size(24.dp)
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.price_check_btn),
+                    contentDescription = "Price Check",
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Fit
+                )
+            }
         }
 
         // Print Last Receipt
-        IconButton(
+        Card(
             onClick = { /* TODO */ },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
+            shape = RoundedCornerShape(4.dp),
+            colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.light_grey))
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.print_last_receipt_btn),
-                contentDescription = "Print Last Receipt",
-                modifier = Modifier.size(24.dp)
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.print_last_receipt_btn),
+                    contentDescription = "Print Last Receipt",
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Fit
+                )
+            }
         }
     }
 }
@@ -773,7 +804,11 @@ fun Keypad(
 
         // Row 4: Exact, 0, Next, Cash (2 cols)
         KeypadRow(
-            buttons = listOf(stringResource(id = R.string.exact), stringResource(id = R.string._0), stringResource(id = R.string.next)),
+            buttons = listOf(
+                stringResource(id = R.string.exact),
+                stringResource(id = R.string._0),
+                stringResource(id = R.string.next)
+            ),
             onDigitClick = onDigitClick,
             onAmountSet = onAmountSet,
             onExactAmount = onExactAmount,
@@ -782,7 +817,11 @@ fun Keypad(
 
         // Row 5: Empty, 00, Clear, Card (2 cols)
         KeypadRow(
-            buttons = listOf("", stringResource(id = R.string._00), stringResource(id = R.string.clear)),
+            buttons = listOf(
+                "",
+                stringResource(id = R.string._00),
+                stringResource(id = R.string.clear)
+            ),
             onDigitClick = onDigitClick,
             onAmountSet = onAmountSet
         )
@@ -806,24 +845,33 @@ fun KeypadRow(
         buttons.forEach { button ->
             KeypadButton(
                 text = button,
-                modifier = Modifier.weight(if (button.contains("$")) 1f else if (isLastRow && button == stringResource(id = R.string.cash)) 2f else 1f),
+                modifier = Modifier.weight(
+                    if (button.contains("$")) 1f else if (isLastRow && button == stringResource(
+                            id = R.string.cash
+                        )
+                    ) 2f else 1f
+                ),
                 onClick = {
                     when {
                         button.contains("$") -> {
                             val amount = button.replace("$", "").toDoubleOrNull() ?: 0.0
                             onAmountSet(amount)
                         }
+
                         button == strExact -> {
                             onExactAmount?.invoke()
                         }
+
                         button.isNotEmpty() -> {
                             onDigitClick(button)
                         }
                     }
                 },
-                isActionButton = button.contains("$") || button == stringResource(id = R.string.exact) || 
-                               button == stringResource(id = R.string.next) || button == stringResource(id = R.string.clear),
-                isPaymentButton = button == stringResource(id = R.string.cash) || button == stringResource(id = R.string.card)
+                isActionButton = button.contains("$") || button == stringResource(id = R.string.exact) ||
+                        button == stringResource(id = R.string.next) || button == stringResource(id = R.string.clear),
+                isPaymentButton = button == stringResource(id = R.string.cash) || button == stringResource(
+                    id = R.string.card
+                )
             )
         }
     }
@@ -875,7 +923,9 @@ fun PaymentMethods(
     ) {
         Button(
             onClick = onCashSelected,
-            modifier = Modifier.weight(2f).height(36.dp),
+            modifier = Modifier
+                .weight(2f)
+                .height(36.dp),
             colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.primary)),
             shape = RoundedCornerShape(4.dp)
         ) {
@@ -900,7 +950,9 @@ fun PaymentMethods(
 
         Button(
             onClick = onCardSelected,
-            modifier = Modifier.weight(2f).height(36.dp),
+            modifier = Modifier
+                .weight(2f)
+                .height(36.dp),
             colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.green_success)),
             shape = RoundedCornerShape(4.dp)
         ) {
@@ -960,7 +1012,9 @@ fun ActionBar(
                     fontFamily = GeneralSans
                 )
             },
-            modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White,
@@ -994,7 +1048,7 @@ fun CategoriesPanel(
     LazyColumn(
         modifier = modifier
             .fillMaxHeight()
-            .background(Color.White)
+            .background(colorResource(id = R.color.light_grey))
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -1038,21 +1092,32 @@ fun ProductsPanel(
     products: List<Products>,
     onProductClick: (Products) -> Unit
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
+    Column(
         modifier = modifier
             .fillMaxHeight()
-            .background(Color.White)
+            .background(colorResource(id = R.color.light_grey))
             .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(products) { product ->
-            ProductItem(
-                product = product,
-                onClick = { onProductClick(product) }
-            )
+        // Products Grid - 60% of height
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+            modifier = Modifier.weight(0.65f),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(products) { product ->
+                ProductItem(
+                    product = product,
+                    onClick = { onProductClick(product) }
+                )
+            }
         }
+
+        // Action Buttons - 40% of height
+        ActionButtonsPanel(
+            modifier = Modifier.weight(0.35f)
+        )
     }
 }
 
@@ -1086,9 +1151,9 @@ fun ProductItem(
                     contentScale = ContentScale.Crop
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(4.dp))
-            
+
             BaseText(
                 text = product.name,
                 color = Color.Black,
@@ -1109,9 +1174,7 @@ fun ActionButtonsPanel(
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .background(Color.White)
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(5.dp),
     ) {
         // Row 1
         ActionButtonRow(
@@ -1177,15 +1240,14 @@ fun ActionButtonRow(
                 shape = RoundedCornerShape(4.dp),
                 colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.light_grey))
             ) {
-                Column(
+                Box(
                     modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
+                    Image(
                         painter = painterResource(id = button.iconRes),
                         contentDescription = button.label,
-                        modifier = Modifier.size(24.dp)
+                        contentScale = ContentScale.Fit
                     )
                 }
             }

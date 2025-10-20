@@ -9,5 +9,7 @@ data class VariantImagesEntity(
     val id: Int = 0,
     val variantId: Int,
     val fileURL: String,
-    val originalName: String
+    val originalName: String,
+    val localPath: String? = null,
+    val isCached: Boolean = false
 )

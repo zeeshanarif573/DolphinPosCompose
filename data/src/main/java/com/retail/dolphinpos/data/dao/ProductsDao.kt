@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.retail.dolphinpos.data.entities.category.CategoryEntity
+import com.retail.dolphinpos.data.entities.products.CachedImageEntity
 import com.retail.dolphinpos.data.entities.products.ProductImagesEntity
 import com.retail.dolphinpos.data.entities.products.ProductsEntity
 import com.retail.dolphinpos.data.entities.products.VariantImagesEntity
@@ -40,5 +41,34 @@ interface ProductsDao {
 
     @Query("SELECT * FROM products WHERE name LIKE '%' || :query || '%'")
     suspend fun searchProducts(query: String): List<ProductsEntity>
+
+    // Cached Images methods
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCachedImage(cachedImage: CachedImageEntity)
+
+    @Query("SELECT * FROM cached_images WHERE originalUrl = :url")
+    suspend fun getCachedImage(url: String): CachedImageEntity?
+
+    @Query("SELECT * FROM cached_images WHERE originalUrl IN (:urls)")
+    suspend fun getCachedImages(urls: List<String>): List<CachedImageEntity>
+
+    @Query("DELETE FROM cached_images WHERE originalUrl = :url")
+    suspend fun deleteCachedImage(url: String)
+
+    @Query("DELETE FROM cached_images WHERE downloadedAt < :timestamp")
+    suspend fun deleteOldCachedImages(timestamp: Long)
+
+    // Update product image local paths
+    @Query("UPDATE product_images SET localPath = :localPath, isCached = :isCached WHERE fileURL = :fileURL")
+    suspend fun updateProductImageLocalPath(fileURL: String, localPath: String?, isCached: Boolean)
+
+    @Query("UPDATE variant_images SET localPath = :localPath, isCached = :isCached WHERE fileURL = :fileURL")
+    suspend fun updateVariantImageLocalPath(fileURL: String, localPath: String?, isCached: Boolean)
+
+    @Query("SELECT * FROM product_images WHERE productId = :productId")
+    suspend fun getProductImagesByProductId(productId: Int): List<ProductImagesEntity>
+
+    @Query("SELECT * FROM variant_images WHERE variantId = :variantId")
+    suspend fun getVariantImagesByVariantId(variantId: Int): List<VariantImagesEntity>
 
 }

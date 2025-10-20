@@ -2,9 +2,14 @@ package com.retail.dolphinpos.data.repositories.auth
 
 import com.retail.dolphinpos.data.dao.ProductsDao
 import com.retail.dolphinpos.data.dao.UserDao
+import com.retail.dolphinpos.data.entities.products.CachedImageEntity
 import com.retail.dolphinpos.data.mapper.ProductMapper
 import com.retail.dolphinpos.data.mapper.UserMapper
 import com.retail.dolphinpos.data.service.ApiService
+import com.retail.dolphinpos.data.service.ImageDownloadService
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import com.retail.dolphinpos.domain.model.auth.login.response.Locations
 import com.retail.dolphinpos.domain.model.auth.login.response.Registers
 import com.retail.dolphinpos.domain.model.auth.logout.LogoutResponse
@@ -24,6 +29,7 @@ class StoreRegisterRepositoryImpl(
     private val api: ApiService,
     private val userDao: UserDao,
     private val productsDao: ProductsDao,
+    private val imageDownloadService: ImageDownloadService,
 ) : StoreRegistersRepository {
 
     override suspend fun updateStoreRegister(updateStoreRegisterRequest: UpdateStoreRegisterRequest): UpdateStoreRegisterResponse {
@@ -164,6 +170,108 @@ class StoreRegisterRepositoryImpl(
             )
         } catch (e: Exception) {
             throw e
+        }
+    }
+
+    override suspend fun downloadAndCacheImages(imageUrls: List<String>) {
+        try {
+            coroutineScope {
+                // Download images in parallel
+                val downloadJobs = imageUrls.map { url ->
+                    async {
+                        try {
+                            // Check if image is already cached
+                            val cachedImage = productsDao.getCachedImage(url)
+                            if (cachedImage != null && imageDownloadService.isImageCached(
+                                    cachedImage.localPath
+                                )
+                            ) {
+                                return@async
+                            }
+
+                            // Download the image
+                            val localPath = imageDownloadService.downloadImage(url)
+                            if (localPath != null) {
+                                val fileName = localPath.substringAfterLast("/")
+                                val fileSize = imageDownloadService.getFileSize(localPath)
+                                
+                                val cachedImageEntity = CachedImageEntity(
+                                    originalUrl = url,
+                                    localPath = localPath,
+                                    fileName = fileName,
+                                    downloadedAt = System.currentTimeMillis(),
+                                    fileSize = fileSize,
+                                    isDownloaded = true
+                                )
+                                
+                                productsDao.insertCachedImage(cachedImageEntity)
+                                
+                                // Update product and variant image entities with local path
+                                productsDao.updateProductImageLocalPath(url, localPath, true)
+                                productsDao.updateVariantImageLocalPath(url, localPath, true)
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            // Log error but don't fail the entire operation
+                        }
+                    }
+                }
+
+                downloadJobs.awaitAll()
+            }
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun getCachedImagePath(imageUrl: String): String? {
+        return try {
+            val cachedImage = productsDao.getCachedImage(imageUrl)
+            if (cachedImage != null && imageDownloadService.isImageCached(cachedImage.localPath)) {
+                cachedImage.localPath
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override suspend fun clearOldCachedImages() {
+        try {
+            // Clear images older than 7 days
+            val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000)
+            productsDao.deleteOldCachedImages(sevenDaysAgo)
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun getProductImagesWithLocalPaths(productId: Int): List<ProductImage> {
+        return try {
+            val productImageEntities = productsDao.getProductImagesByProductId(productId)
+            productImageEntities.map { entity ->
+                ProductImage(
+                    fileURL = entity.localPath ?: entity.fileURL, // Use local path if available, otherwise original URL
+                    originalName = entity.originalName
+                )
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun getVariantImagesWithLocalPaths(variantId: Int): List<VariantImage> {
+        return try {
+            val variantImageEntities = productsDao.getVariantImagesByVariantId(variantId)
+            variantImageEntities.map { entity ->
+                VariantImage(
+                    fileURL = entity.localPath ?: entity.fileURL, // Use local path if available, otherwise original URL
+                    originalName = entity.originalName
+                )
+            }
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 }

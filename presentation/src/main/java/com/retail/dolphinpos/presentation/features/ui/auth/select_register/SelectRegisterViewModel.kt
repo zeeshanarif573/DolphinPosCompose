@@ -119,6 +119,9 @@ class SelectRegisterViewModel @Inject constructor(
                     return@launch
                 }
 
+                // Collect all image URLs for downloading
+                val allImageUrls = mutableListOf<String>()
+                
                 response.category!!.categories.forEach { category ->
                     // Insert category
                     storeRegistersRepository.insertCategoriesIntoLocalDB(listOf(category))
@@ -133,6 +136,12 @@ class SelectRegisterViewModel @Inject constructor(
                             product.images,
                             product.id
                         )
+                        
+                        // Collect product image URLs
+                        product.images.forEach { image ->
+                            allImageUrls.add(image.fileURL)
+                        }
+                        
                         // Insert vendor
                         product.vendor?.let {
                             storeRegistersRepository.insertVendorDetailsIntoLocalDB(it, product.id)
@@ -148,8 +157,31 @@ class SelectRegisterViewModel @Inject constructor(
                                 variant.images,
                                 variant.id
                             )
+                            
+                            // Collect variant image URLs
+                            variant.images.forEach { image ->
+                                allImageUrls.add(image.fileURL)
+                            }
                         }
                     }
+                }
+                
+                // Download and cache all images
+                if (allImageUrls.isNotEmpty()) {
+                    try {
+                        storeRegistersRepository.downloadAndCacheImages(allImageUrls)
+                    } catch (e: Exception) {
+                        // Log error but don't fail the entire operation
+                        e.printStackTrace()
+                    }
+                }
+                
+                // Clear old cached images to manage storage
+                try {
+                    storeRegistersRepository.clearOldCachedImages()
+                } catch (e: Exception) {
+                    // Log error but don't fail the entire operation
+                    e.printStackTrace()
                 }
                 _selectRegisterUiEvent.emit(SelectRegisterUiEvent.HideLoading)
                 updateStoreRegister(locationID, storeRegisterID)

@@ -10,6 +10,7 @@ import com.retail.dolphinpos.data.dao.ProductsDao
 import com.retail.dolphinpos.data.dao.UserDao
 import com.retail.dolphinpos.data.entities.category.CategoryEntity
 import com.retail.dolphinpos.data.entities.customer.CustomerEntity
+import com.retail.dolphinpos.data.entities.products.CachedImageEntity
 import com.retail.dolphinpos.data.entities.products.ProductImagesEntity
 import com.retail.dolphinpos.data.entities.products.ProductsEntity
 import com.retail.dolphinpos.data.entities.products.VariantImagesEntity
@@ -27,8 +28,9 @@ import com.retail.dolphinpos.data.entities.user.UserEntity
 @Database(
     entities = [UserEntity::class, StoreEntity::class, StoreLogoUrlEntity::class, LocationEntity::class, RegisterEntity::class,
         ActiveUserDetailsEntity::class, BatchEntity::class, RegisterStatusEntity::class, CategoryEntity::class, ProductsEntity::class,
-        ProductImagesEntity::class, VariantsEntity::class, VariantImagesEntity::class, VendorEntity::class, CustomerEntity::class],
-    version = 1,
+        ProductImagesEntity::class, VariantsEntity::class, VariantImagesEntity::class, VendorEntity::class, CustomerEntity::class,
+        CachedImageEntity::class],
+    version = 3,
     exportSchema = false
 )
 abstract class DolphinDatabase : RoomDatabase() {

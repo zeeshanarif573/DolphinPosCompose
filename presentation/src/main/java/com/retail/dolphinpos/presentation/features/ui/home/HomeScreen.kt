@@ -1,5 +1,6 @@
 package com.retail.dolphinpos.presentation.features.ui.home
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,29 +22,35 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -56,24 +63,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import android.widget.Toast
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.ui.text.input.KeyboardType
 import coil3.compose.AsyncImage
 import com.retail.dolphinpos.common.components.BaseText
 import com.retail.dolphinpos.common.components.HeaderAppBarAuth
@@ -247,12 +252,14 @@ fun HomeScreen(
             ProductsPanel(
                 modifier = Modifier.weight(0.3f),
                 products = if (searchQuery.isNotEmpty()) searchResults else products,
+                cartItems = cartItems,
                 onProductClick = { product ->
                     viewModel.addToCart(product)
-                }
+                },
+                onShowOrderDiscountDialog = { showOrderDiscountDialog = true }
             )
         }
-        
+
         // Order Level Discount Dialog
         if (showOrderDiscountDialog) {
             OrderLevelDiscountDialog(
@@ -321,6 +328,7 @@ fun CartPanel(
         }
     }
 }
+
 @Composable
 fun CartActionButtons(
     onClearCart: () -> Unit
@@ -437,26 +445,6 @@ fun PricingSummary(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Subtotal
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            BaseText(
-                text = "Subtotal:",
-                color = Color.Black,
-                fontSize = 12f,
-                fontFamily = GeneralSans
-            )
-            BaseText(
-                text = String.format(Locale.US, "$%.2f", subtotal),
-                color = Color.Black,
-                fontSize = 12f,
-                fontFamily = GeneralSans,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
         // Cash Discount
         if (cashDiscountTotal > 0) {
             Row(
@@ -487,7 +475,7 @@ fun PricingSummary(
             ) {
                 BaseText(
                     text = "Order Discount:",
-                    color = Color.Green,
+                    color = colorResource(id = R.color.green_success),
                     fontSize = 12f,
                     fontFamily = GeneralSans
                 )
@@ -499,6 +487,26 @@ fun PricingSummary(
                     fontWeight = FontWeight.SemiBold
                 )
             }
+        }
+
+        // Subtotal
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            BaseText(
+                text = "Subtotal:",
+                color = Color.Black,
+                fontSize = 12f,
+                fontFamily = GeneralSans
+            )
+            BaseText(
+                text = String.format(Locale.US, "$%.2f", subtotal),
+                color = Color.Black,
+                fontSize = 12f,
+                fontFamily = GeneralSans,
+                fontWeight = FontWeight.SemiBold
+            )
         }
 
         // Tax
@@ -534,14 +542,14 @@ fun PricingSummary(
         ) {
             BaseText(
                 text = "Total:",
-                color = Color.Black,
+                color = colorResource(id = R.color.primary),
                 fontSize = 14f,
                 fontFamily = GeneralSans,
                 fontWeight = FontWeight.Bold
             )
             BaseText(
                 text = String.format(Locale.US, "$%.2f", totalAmount),
-                color = Color.Black,
+                color = colorResource(id = R.color.primary),
                 fontSize = 14f,
                 fontFamily = GeneralSans,
                 fontWeight = FontWeight.Bold
@@ -1241,7 +1249,9 @@ fun CategoryItem(
 fun ProductsPanel(
     modifier: Modifier = Modifier,
     products: List<Products>,
-    onProductClick: (Products) -> Unit
+    cartItems: List<CartItem>,
+    onProductClick: (Products) -> Unit,
+    onShowOrderDiscountDialog: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -1267,7 +1277,9 @@ fun ProductsPanel(
 
         // Action Buttons - 40% of height
         ActionButtonsPanel(
-            modifier = Modifier.weight(0.41f)
+            modifier = Modifier.weight(0.41f),
+            cartItems = cartItems,
+            onShowOrderDiscountDialog = onShowOrderDiscountDialog
         )
     }
 }
@@ -1320,8 +1332,11 @@ fun ProductItem(
 
 @Composable
 fun ActionButtonsPanel(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    cartItems: List<CartItem>,
+    onShowOrderDiscountDialog: () -> Unit
 ) {
+    val context = LocalContext.current
     Column(
         modifier = modifier
             .fillMaxHeight()
@@ -1334,7 +1349,10 @@ fun ActionButtonsPanel(
                 ActionButton("Gift Card", R.drawable.gift_card_btn),
                 ActionButton("Pending Orders", R.drawable.pending_orders_button),
                 ActionButton("Refund", R.drawable.refund_btn)
-            )
+            ),
+            onActionClick = { action ->
+                // TODO: Add action handlers for these buttons
+            }
         )
 
         // Row 2
@@ -1344,7 +1362,10 @@ fun ActionButtonsPanel(
                 ActionButton("Rewards", R.drawable.rewards_btn),
                 ActionButton("Online Order", R.drawable.online_order_btn),
                 ActionButton("Tax Exempt", R.drawable.tax_exempt_btn)
-            )
+            ),
+            onActionClick = { action ->
+                // TODO: Add action handlers for these buttons
+            }
         )
 
         // Row 3
@@ -1354,7 +1375,10 @@ fun ActionButtonsPanel(
                 ActionButton("Last Receipt", R.drawable.last_receipt),
                 ActionButton("Pay In/Out", R.drawable.pay_in_out_btn),
                 ActionButton("Void", R.drawable.void_btn)
-            )
+            ),
+            onActionClick = { action ->
+                // TODO: Add action handlers for these buttons
+            }
         )
 
         // Row 4
@@ -1364,7 +1388,23 @@ fun ActionButtonsPanel(
                 ActionButton("Weight Scale", R.drawable.weight_scale_btn),
                 ActionButton("Clock In/Out", R.drawable.clock_in_out_btn),
                 ActionButton("Order Discount", R.drawable.discount_btn)
-            )
+            ),
+            onActionClick = { action ->
+                when (action) {
+                    "Order Discount" -> {
+                        if (cartItems.isEmpty()) {
+                            Toast.makeText(
+                                context,
+                                "There are no items in cart",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            onShowOrderDiscountDialog()
+                        }
+                    }
+                    // TODO: Add other action handlers
+                }
+            }
         )
     }
 }
@@ -1376,7 +1416,8 @@ data class ActionButton(
 
 @Composable
 fun ActionButtonRow(
-    buttons: List<ActionButton>
+    buttons: List<ActionButton>,
+    onActionClick: (String) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -1384,7 +1425,7 @@ fun ActionButtonRow(
     ) {
         buttons.forEach { button ->
             Card(
-                onClick = { /* TODO: Handle action */ },
+                onClick = { onActionClick(button.label) },
                 modifier = Modifier
                     .weight(1f)
                     .height(60.dp),
@@ -1534,7 +1575,7 @@ fun ProductLevelDiscountDialog(
                         onCheckedChange = { chargeTax = it },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
-                            checkedTrackColor = Color(0xFF4CAF50),
+                            checkedTrackColor = colorResource(id = R.color.primary),
                             uncheckedThumbColor = Color.White,
                             uncheckedTrackColor = Color.Gray
                         )
@@ -1594,7 +1635,7 @@ fun ProductLevelDiscountDialog(
                                     com.retail.dolphinpos.domain.model.home.cart.DiscountType.PERCENTAGE
                             },
                             colors = RadioButtonDefaults.colors(
-                                selectedColor = Color(0xFF4CAF50),
+                                selectedColor = colorResource(id = R.color.primary),
                                 unselectedColor = Color.Gray
                             )
                         )
@@ -1615,7 +1656,7 @@ fun ProductLevelDiscountDialog(
                                     com.retail.dolphinpos.domain.model.home.cart.DiscountType.AMOUNT
                             },
                             colors = RadioButtonDefaults.colors(
-                                selectedColor = Color(0xFF4CAF50),
+                                selectedColor = colorResource(id = R.color.primary),
                                 unselectedColor = Color.Gray
                             )
                         )
@@ -1725,7 +1766,7 @@ fun ProductLevelDiscountDialog(
                         onApplyDiscount(updatedCartItem)
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF4CAF50)
+                        containerColor = colorResource(id = R.color.primary)
                     )
                 ) {
                     BaseText(
@@ -1741,6 +1782,7 @@ fun ProductLevelDiscountDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderLevelDiscountDialog(
     onDismiss: () -> Unit,
@@ -1772,7 +1814,7 @@ fun OrderLevelDiscountDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 BaseText(
-                    text = "Order Level Discount",
+                    text = "Discount",
                     color = Color.Black,
                     fontSize = 16f,
                     fontFamily = GeneralSans,
@@ -1803,28 +1845,50 @@ fun OrderLevelDiscountDialog(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                // Simple dropdown simulation with buttons
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.height(120.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                // Dropdown for reason selection
+                var expanded by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
                 ) {
-                    items(reasons.drop(1)) { reason ->
-                        Button(
-                            onClick = { selectedReason = reason },
-                            modifier = Modifier.height(32.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (selectedReason == reason) 
-                                    colorResource(id = R.color.primary) else Color(0xFFF5F5F5)
-                            ),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            BaseText(
-                                text = reason,
-                                color = if (selectedReason == reason) Color.White else Color.Black,
-                                fontSize = 10f,
-                                fontFamily = GeneralSans
+                    OutlinedTextField(
+                        value = selectedReason,
+                        onValueChange = { },
+                        readOnly = true,
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White
+                        ),
+                        textStyle = TextStyle(
+                            fontSize = 12.sp,
+                            fontFamily = GeneralSans,
+                            color = Color.Black
+                        )
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        reasons.drop(1).forEach { reason ->
+                            DropdownMenuItem(
+                                text = {
+                                    BaseText(
+                                        text = reason,
+                                        color = Color.Black,
+                                        fontSize = 12f,
+                                        fontFamily = GeneralSans
+                                    )
+                                },
+                                onClick = {
+                                    selectedReason = reason
+                                    expanded = false
+                                }
                             )
                         }
                     }
@@ -1878,7 +1942,10 @@ fun OrderLevelDiscountDialog(
                     ) {
                         RadioButton(
                             selected = discountType == com.retail.dolphinpos.domain.model.home.cart.DiscountType.PERCENTAGE,
-                            onClick = { discountType = com.retail.dolphinpos.domain.model.home.cart.DiscountType.PERCENTAGE },
+                            onClick = {
+                                discountType =
+                                    com.retail.dolphinpos.domain.model.home.cart.DiscountType.PERCENTAGE
+                            },
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = colorResource(id = R.color.primary),
                                 unselectedColor = Color.Gray
@@ -1896,7 +1963,10 @@ fun OrderLevelDiscountDialog(
                     ) {
                         RadioButton(
                             selected = discountType == com.retail.dolphinpos.domain.model.home.cart.DiscountType.AMOUNT,
-                            onClick = { discountType = com.retail.dolphinpos.domain.model.home.cart.DiscountType.AMOUNT },
+                            onClick = {
+                                discountType =
+                                    com.retail.dolphinpos.domain.model.home.cart.DiscountType.AMOUNT
+                            },
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = colorResource(id = R.color.primary),
                                 unselectedColor = Color.Gray
@@ -1921,23 +1991,24 @@ fun OrderLevelDiscountDialog(
                         fontWeight = FontWeight.SemiBold
                     )
 
-                    LazyColumn(
-                        modifier = Modifier.height(100.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    LazyRow(
+                        modifier = Modifier.height(60.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(orderDiscounts) { discount ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(
-                                        color = Color(0xFFF5F5F5),
-                                        shape = RoundedCornerShape(4.dp)
-                                    )
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            Card(
+                                modifier = Modifier.width(120.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color(0xFFF5F5F5)
+                                ),
+                                shape = RoundedCornerShape(4.dp)
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(8.dp),
+                                    verticalArrangement = Arrangement.Center
+                                ) {
                                     BaseText(
                                         text = discount.reason,
                                         color = Color.Black,
@@ -1978,17 +2049,19 @@ fun OrderLevelDiscountDialog(
                     onClick = {
                         val value = discountValue.toDoubleOrNull()
                         if (selectedReason != "Select Reason" && value != null && value > 0) {
-                            val newDiscount = com.retail.dolphinpos.domain.model.home.order_discount.OrderDiscount(
-                                reason = selectedReason,
-                                type = discountType,
-                                value = value
-                            )
+                            val newDiscount =
+                                com.retail.dolphinpos.domain.model.home.order_discount.OrderDiscount(
+                                    reason = selectedReason,
+                                    type = discountType,
+                                    value = value
+                                )
                             orderDiscounts = orderDiscounts + newDiscount
-                            
+
                             // Reset fields
                             discountValue = ""
                             selectedReason = "Select Reason"
-                            discountType = com.retail.dolphinpos.domain.model.home.cart.DiscountType.PERCENTAGE
+                            discountType =
+                                com.retail.dolphinpos.domain.model.home.cart.DiscountType.PERCENTAGE
                         } else {
                             Toast.makeText(
                                 context,

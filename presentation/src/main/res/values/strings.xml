@@ -14,7 +14,7 @@
     <string name="search">Search</string>
     <string name="coins">Coins</string>
     <string name="no_loc_found">No Location Found</string>
-    <string name="no_register_found">No Register Found</string>
+    <string name="no_register_found">No register found at this location</string>
     <string name="select_register_error">Please select a register</string>
     <string name="pin_code_incorrect">PIN Code Incorrect</string>
     <string name="search_items">Search Items</string>

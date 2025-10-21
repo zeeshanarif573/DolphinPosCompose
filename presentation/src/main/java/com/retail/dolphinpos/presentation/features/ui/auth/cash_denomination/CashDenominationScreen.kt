@@ -200,23 +200,21 @@ fun CashDenominationScreen(
                     navController.navigate(
                         "home"
                     )
-                    // Navigate to HomeActivity
-                    // Note: You'll need to handle navigation to HomeActivity
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Open Cash Drawer Button
-                BaseButton(
-                    text = stringResource(id = R.string.open_cash_drawer),
-                    modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .height(48.dp),
-                    backgroundColor = Color.Gray,
-                    fontSize = 14
-                ) {
-                    // Handle open cash drawer
-                }
+//                Spacer(modifier = Modifier.height(16.dp))
+//
+//                // Open Cash Drawer Button
+//                BaseButton(
+//                    text = stringResource(id = R.string.open_cash_drawer),
+//                    modifier = Modifier
+//                        .fillMaxWidth(0.5f)
+//                        .height(48.dp),
+//                    backgroundColor = Color.Gray,
+//                    fontSize = 14
+//                ) {
+//                    // Handle open cash drawer
+//                }
             }
         }
     }

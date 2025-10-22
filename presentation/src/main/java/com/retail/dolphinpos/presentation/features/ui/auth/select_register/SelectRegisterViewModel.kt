@@ -125,7 +125,7 @@ class SelectRegisterViewModel @Inject constructor(
                 response.category!!.categories.forEach { category ->
                     // Insert category
                     storeRegistersRepository.insertCategoriesIntoLocalDB(listOf(category))
-                    category.products.forEach { product ->
+                    category.products!!.forEach { product ->
                         // Insert products
                         storeRegistersRepository.insertProductsIntoLocalDB(
                             listOf(product),
@@ -138,8 +138,8 @@ class SelectRegisterViewModel @Inject constructor(
                         )
                         
                         // Collect product image URLs
-                        product.images.forEach { image ->
-                            allImageUrls.add(image.fileURL)
+                        product.images?.forEach { image ->
+                            image.fileURL?.let { allImageUrls.add(it) }
                         }
                         
                         // Insert vendor
@@ -147,7 +147,7 @@ class SelectRegisterViewModel @Inject constructor(
                             storeRegistersRepository.insertVendorDetailsIntoLocalDB(it, product.id)
                         }
                         // Insert variants
-                        product.variants.forEach { variant ->
+                        product.variants!!.forEach { variant ->
                             storeRegistersRepository.insertProductVariantsIntoLocalDB(
                                 listOf(variant),
                                 product.id
@@ -160,7 +160,7 @@ class SelectRegisterViewModel @Inject constructor(
                             
                             // Collect variant image URLs
                             variant.images.forEach { image ->
-                                allImageUrls.add(image.fileURL)
+                                image.fileURL?.let { allImageUrls.add(it) }
                             }
                         }
                     }

@@ -23,6 +23,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.retail.dolphinpos.common.components.BaseText
@@ -163,7 +164,9 @@ object Utils {
                     color = Color.Black,
                     fontSize = 18F,
                     textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    maxLines = Int.MAX_VALUE,
+                    overflow = TextOverflow.Visible
                 )
 
                 // Button

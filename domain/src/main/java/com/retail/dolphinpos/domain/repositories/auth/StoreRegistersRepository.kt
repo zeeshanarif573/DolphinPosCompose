@@ -24,7 +24,7 @@ interface StoreRegistersRepository {
     suspend fun getRegisterStatus(): UpdateStoreRegisterData
     suspend fun insertCategoriesIntoLocalDB(categoryList: List<CategoryData>)
     suspend fun insertProductsIntoLocalDB(productList: List<Products>, categoryId: Int)
-    suspend fun insertProductImagesIntoLocalDB(productImageList: List<ProductImage>, productId: Int)
+    suspend fun insertProductImagesIntoLocalDB(productImageList: List<ProductImage>?, productId: Int)
     suspend fun insertProductVariantsIntoLocalDB(productVariantList: List<Variant>, productId: Int)
     suspend fun insertVariantImagesIntoLocalDB(variantImageList: List<VariantImage>, variantId: Int)
     suspend fun insertVendorDetailsIntoLocalDB(vendor: Vendor, productId: Int)

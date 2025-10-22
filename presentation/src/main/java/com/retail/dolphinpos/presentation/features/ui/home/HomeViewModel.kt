@@ -29,8 +29,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val homeRepository: HomeRepository,
-    private val preferenceManager: PreferenceManager
+    private val homeRepository: HomeRepository, private val preferenceManager: PreferenceManager
 ) : ViewModel() {
 
     var isCashSelected: Boolean = false
@@ -65,8 +64,12 @@ class HomeViewModel @Inject constructor(
     private val _totalAmount = MutableStateFlow(0.0)
     val totalAmount: StateFlow<Double> = _totalAmount.asStateFlow()
 
-    private val _categories = MutableStateFlow<List<com.retail.dolphinpos.domain.model.home.catrgories_products.CategoryData>>(emptyList())
-    val categories: StateFlow<List<com.retail.dolphinpos.domain.model.home.catrgories_products.CategoryData>> = _categories.asStateFlow()
+    private val _categories =
+        MutableStateFlow<List<com.retail.dolphinpos.domain.model.home.catrgories_products.CategoryData>>(
+            emptyList()
+        )
+    val categories: StateFlow<List<com.retail.dolphinpos.domain.model.home.catrgories_products.CategoryData>> =
+        _categories.asStateFlow()
 
     private val _menus = MutableStateFlow<List<BottomMenu>>(emptyList())
     val menus: StateFlow<List<BottomMenu>> = _menus.asStateFlow()
@@ -98,28 +101,17 @@ class HomeViewModel @Inject constructor(
     private fun loadMenus() {
         _menus.value = listOf(
             BottomMenu(
-                menuName = "Home",
-                destinationId = R.id.homeScreen
-            ),
-            BottomMenu(
-                menuName = "Products",
-                destinationId = R.id.productsScreen
-            ),
-            BottomMenu(
-                menuName = "Orders",
-                destinationId = R.id.ordersScreen
-            ),
-            BottomMenu(
-                menuName = "Inventory",
-                destinationId = R.id.inventoryScreen
-            ),
-            BottomMenu(
-                menuName = "Reports",
-                destinationId = R.id.reportsScreen
-            ),
-            BottomMenu(
-                menuName = "Setup",
-                destinationId = R.id.setupScreen
+                menuName = "Home", destinationId = R.id.homeScreen
+            ), BottomMenu(
+                menuName = "Products", destinationId = R.id.productsScreen
+            ), BottomMenu(
+                menuName = "Orders", destinationId = R.id.ordersScreen
+            ), BottomMenu(
+                menuName = "Inventory", destinationId = R.id.inventoryScreen
+            ), BottomMenu(
+                menuName = "Reports", destinationId = R.id.reportsScreen
+            ), BottomMenu(
+                menuName = "Setup", destinationId = R.id.setupScreen
             )
         )
     }
@@ -177,7 +169,7 @@ class HomeViewModel @Inject constructor(
                     productId = product.id,
                     name = product.name,
                     quantity = 1,
-                    imageUrl = product.images.firstOrNull()?.fileURL,
+                    imageUrl = product.images?.firstOrNull()?.fileURL,
                     productVariantId = null,
                     cardPrice = product.cardPrice.toDouble(),
                     cashPrice = product.cashPrice.toDouble(),
@@ -254,6 +246,7 @@ class HomeViewModel @Inject constructor(
                         // ✅ apply percentage on current subtotal
                         discountedSubtotal - (discountedSubtotal * discount.value / 100.0)
                     }
+
                     DiscountType.AMOUNT -> {
                         discountedSubtotal - discount.value
                     }
@@ -263,7 +256,7 @@ class HomeViewModel @Inject constructor(
 
             // 3️⃣ Tax (only for taxable products, proportional to discount)
             val taxableBase = cartItems.sumOf { cart ->
-                if (cart.chargeTaxOnThisProduct) cart.getProductDiscountedPrice() * cart.quantity else 0.0
+                if (cart.chargeTaxOnThisProduct!!) cart.getProductDiscountedPrice() * cart.quantity else 0.0
             }
 
             val taxableAfterOrderDiscounts = if (baseSubtotal > 0) {
@@ -302,9 +295,7 @@ class HomeViewModel @Inject constructor(
     fun appendDigitToAmount(currentAmount: Double, digit: String): Double {
         val currentCents = (BigDecimal.valueOf(currentAmount) * BigDecimal(100)).toBigInteger()
         val updatedCents = (currentCents.toString() + digit).toBigIntegerOrNull() ?: currentCents
-        return BigDecimal(updatedCents)
-            .divide(BigDecimal(100))
-            .setScale(2, RoundingMode.HALF_UP)
+        return BigDecimal(updatedCents).divide(BigDecimal(100)).setScale(2, RoundingMode.HALF_UP)
             .toDouble()
     }
 

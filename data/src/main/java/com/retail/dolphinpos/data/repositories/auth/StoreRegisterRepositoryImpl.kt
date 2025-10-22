@@ -111,17 +111,17 @@ class StoreRegisterRepositoryImpl(
     }
 
     override suspend fun insertProductImagesIntoLocalDB(
-        productImageList: List<ProductImage>,
+        productImageList: List<ProductImage>?,
         productId: Int
     ) {
         try {
-            val productImagesEntities = productImageList.map { productImage ->
+            val productImagesEntities = productImageList?.map { productImage ->
                 ProductMapper.toProductImagesEntity(
                     productImages = productImage,
                     productId = productId
                 )
             }
-            productsDao.insertProductImages(productImagesEntities)
+            productImagesEntities?.let { productsDao.insertProductImages(it) }
         } catch (e: Exception) {
             throw e
         }

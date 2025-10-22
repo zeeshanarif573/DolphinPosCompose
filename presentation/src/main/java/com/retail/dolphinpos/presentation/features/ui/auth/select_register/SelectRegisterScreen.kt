@@ -56,6 +56,11 @@ fun SelectRegisterScreen(
 
     var selectedLocation by remember { mutableStateOf<Locations?>(null) }
     var selectedRegister by remember { mutableStateOf<Registers?>(null) }
+    
+    // Derived state for button enabled
+    val isButtonEnabled = remember(selectedLocation, selectedRegister) {
+        selectedLocation != null && selectedRegister != null
+    }
 
     val locationError = stringResource(id = R.string.no_loc_found)
     val registerError = stringResource(id = R.string.no_register_found)
@@ -112,9 +117,8 @@ fun SelectRegisterScreen(
                             iconRes = R.drawable.info_icon
                         ) {}
                     } else {
-                        if (event.registersList.size == 1) {
-                            selectedRegister = event.registersList[0]
-                        }
+                        // Auto-select the first register if available
+                        selectedRegister = event.registersList[0]
                     }
                 }
             }
@@ -241,7 +245,7 @@ fun SelectRegisterScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp),
-                            enabled = selectedLocation != null && selectedRegister != null
+                            enabled = isButtonEnabled
                         ) {
                             selectedLocation?.let { loc ->
                                 selectedRegister?.let { reg ->

@@ -771,7 +771,7 @@ fun CartItemRow(
                 modifier = Modifier.weight(1f)
             ) {
                 BaseText(
-                    text = item.name,
+                    text = item.name!!,
                     color = Color.Black,
                     fontSize = 12f,
                     fontFamily = GeneralSans
@@ -1304,9 +1304,9 @@ fun ProductItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            if (product.images.isNotEmpty()) {
+            if (product.images!!.isNotEmpty()) {
                 AsyncImage(
-                    model = product.images.first().fileURL,
+                    model = product.images!!.first().fileURL,
                     contentDescription = product.name,
                     modifier = Modifier
                         .size(48.dp)
@@ -1318,7 +1318,7 @@ fun ProductItem(
             Spacer(modifier = Modifier.height(4.dp))
 
             BaseText(
-                text = product.name,
+                text = product.name!!,
                 color = Color.Black,
                 fontSize = 10f,
                 fontFamily = GeneralSans,
@@ -1494,7 +1494,7 @@ fun ProductLevelDiscountDialog(
             ) {
                 // Product Name
                 BaseText(
-                    text = cartItem.name,
+                    text = cartItem.name!!,
                     color = Color.Black,
                     fontSize = 14f,
                     fontFamily = GeneralSans,
@@ -1571,7 +1571,7 @@ fun ProductLevelDiscountDialog(
                         fontFamily = GeneralSans
                     )
                     Switch(
-                        checked = chargeTax,
+                        checked = chargeTax!!,
                         onCheckedChange = { chargeTax = it },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,

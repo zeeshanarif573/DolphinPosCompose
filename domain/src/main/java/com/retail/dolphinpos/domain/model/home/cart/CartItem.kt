@@ -6,7 +6,7 @@ data class CartItem(
     val productId: Int?,
     val productVariantId: Int? = null,
     val productVariantName: String? = null,
-    val name: String,
+    val name: String?,
     val cardPrice: Double = 0.0,
     val cashPrice: Double = 0.0,
     val selectedPrice: Double = 0.0,
@@ -22,7 +22,7 @@ data class CartItem(
     val images: VariantImage? = null,
     val costPrice: Double? = 0.0,
     val sku: String? = "",
-    var chargeTaxOnThisProduct: Boolean = true,
+    var chargeTaxOnThisProduct: Boolean? = true,
     val fixedDiscount: Double? = null,
     val discountReason: String? = "",
     val fixedPercentageDiscount: Double? = null,
@@ -43,6 +43,7 @@ fun CartItem.getProductDiscountPercentage(): Double {
         else -> 0.0
     }
 }
+
 
 fun CartItem.getProductDiscountedPrice(): Double {
     return when (discountType) {
